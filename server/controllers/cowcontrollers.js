@@ -31,3 +31,14 @@ export const updateCow = async (req, res, next) => {
         next(error);
     }
 };
+export const deleteCow = async (req, res, next) => {
+    try {
+        const cow = await Cow.findByIdAndDelete(req.params.id);
+        if (!cow) {
+            return res.status(404).json({ success: false, message: "Cow not found" });
+        }
+        res.status(200).json({ success: true, message: "Cow deleted successfully" });
+    } catch (error) {
+        next(error);
+    }
+};
