@@ -3,7 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import testRoutes from "./routes/testroutes.js";
+import cowRoutes from "./routes/cowroutes.js";
 
+app.use("/api/cows", cowRoutes);
 dotenv.config();
 
 connectDB();
