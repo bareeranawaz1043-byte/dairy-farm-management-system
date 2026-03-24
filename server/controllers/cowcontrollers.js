@@ -1,6 +1,6 @@
 import Cow from "../models/cow.js";
 
-export const createCow = async (req, res, next) => {
+const createCow = async (req, res, next) => {
     try {
         const { name, age, breed, milkCapacity } = req.body;
         const cow = await Cow.create({ name, age, breed, milkCapacity });
@@ -9,7 +9,7 @@ export const createCow = async (req, res, next) => {
         next(error);
     }
 };
-export const getCows = async (req, res, next) => {
+const getCows = async (req, res, next) => {
     try {
         const cows = await Cow.find();
         res.status(200).json({ success: true, cows });
@@ -17,7 +17,7 @@ export const getCows = async (req, res, next) => {
         next(error);
     }
 };
-export const updateCow = async (req, res, next) => {
+const updateCow = async (req, res, next) => {
     try {
         const cow = await Cow.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
@@ -31,7 +31,7 @@ export const updateCow = async (req, res, next) => {
         next(error);
     }
 };
-export const deleteCow = async (req, res, next) => {
+const deleteCow = async (req, res, next) => {
     try {
         const cow = await Cow.findByIdAndDelete(req.params.id);
         if (!cow) {
@@ -42,3 +42,4 @@ export const deleteCow = async (req, res, next) => {
         next(error);
     }
 };
+export { createCow, getCows, updateCow, deleteCow };
