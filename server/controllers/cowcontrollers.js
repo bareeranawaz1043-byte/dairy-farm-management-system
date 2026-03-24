@@ -13,7 +13,11 @@ const createCow = async (req, res, next) => {
 
         const cow = await Cow.create({ name, age, breed, milkCapacity });
 
-        res.status(201).json({ success: true, cow });
+        res.status(201).json({
+            success: true,
+            message: "Cow created successfully",
+            data: cow,
+        });
     } catch (error) {
         next(error);
     }
@@ -21,7 +25,11 @@ const createCow = async (req, res, next) => {
 const getCows = async (req, res, next) => {
     try {
         const cows = await Cow.find();
-        res.status(200).json({ success: true, cows });
+        res.status(200).json({
+            success: true,
+            message: "Cows fetched successfully",
+            data: cows,
+        });
     } catch (error) {
         next(error);
     }
@@ -49,7 +57,11 @@ const updateCow = async (req, res, next) => {
             });
         }
 
-        res.status(200).json({ success: true, cow });
+        res.status(200).json({
+            success: true,
+            message: "Cow updated successfully",
+            data: cow,
+        });
     } catch (error) {
         next(error);
     }
@@ -58,9 +70,16 @@ const deleteCow = async (req, res, next) => {
     try {
         const cow = await Cow.findByIdAndDelete(req.params.id);
         if (!cow) {
-            return res.status(404).json({ success: false, message: "Cow not found" });
+            return res.status(404).json({
+                success: false,
+                message: "Cow not found"
+            });
         }
-        res.status(200).json({ success: true, message: "Cow deleted successfully" });
+        res.status(200).json({
+            success: true,
+            message: "Cow deleted successfully",
+            data: null,
+        });
     } catch (error) {
         next(error);
     }
