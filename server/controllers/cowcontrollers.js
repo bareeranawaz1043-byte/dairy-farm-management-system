@@ -17,3 +17,17 @@ export const getCows = async (req, res, next) => {
         next(error);
     }
 };
+export const updateCow = async (req, res, next) => {
+    try {
+        const cow = await Cow.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+        if (!cow) {
+            return res.status(404).json({ success: false, message: "Cow not found" });
+        }
+        res.status(200).json({ success: true, cow });
+    } catch (error) {
+        next(error);
+    }
+};

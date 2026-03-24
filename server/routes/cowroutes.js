@@ -1,6 +1,9 @@
 import express from "express";
-import { createCow } from "../controllers/cowController.js";
+import { createCow } from "../controllers/cowcontroller.js";
 import { getCows } from "../controllers/cowcontroller.js";
+import { updateCow } from "../controllers/cowcontroller.js";
+
+router.put("/:id", updateCow);
 
 const router = express.Router();
 
