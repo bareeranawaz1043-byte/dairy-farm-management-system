@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import testRoutes from "./routes/testroutes.js";
 import cowRoutes from "./routes/cowroutes.js";
+import { errorHandler } from "./middlewares/errorhandler.js";
+
+app.use(errorHandler);
 
 app.use("/api/cows", cowRoutes);
 dotenv.config();
