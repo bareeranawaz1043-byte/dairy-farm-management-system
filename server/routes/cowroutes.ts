@@ -1,16 +1,20 @@
 import express from "express";
-import { createCow, getCows, updateCow, deleteCow } from "../controllers/cowcontrollers.ts";
+import {
+  createCow,
+  getCows,
+  updateCow,
+  deleteCow,
+  getSickCows,
+  getAlerts,
+} from "../controllers/cowcontrollers";
 
 const router = express.Router();
 
-// /api/cows
-router.route("/")
-    .get(getCows)
-    .post(createCow);
-
-// /api/cows/:id
-router.route("/:id")
-    .put(updateCow)
-    .delete(deleteCow);
+router.post("/", createCow);
+router.get("/", getCows);
+router.put("/:id", updateCow);
+router.delete("/:id", deleteCow);
+router.get("/sick", getSickCows);
+router.get("/alerts", getAlerts);
 
 export default router;
