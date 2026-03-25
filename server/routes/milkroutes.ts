@@ -1,5 +1,5 @@
 import express from "express";
-import { createMilk, getMilk } from "@/controllers/milkcontrollers";
+import { createMilk, getMilk } from "../controllers/milkcontrollers";
 
 const router = express.Router();
 
