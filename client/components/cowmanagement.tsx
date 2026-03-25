@@ -10,54 +10,58 @@ type Cow = {
   _id: string;
   name: string;
   age: number;
+  health?: string;
 };
 
 export default function CowManagement() {
   const [cows, setCows] = useState<Cow[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]); 
   const [editingCow, setEditingCow] = useState<Cow | null>(null);
 
-  // Fetch cows from backend
   const fetchCows = async () => {
     try {
       const res = await API.get("/cows");
-      setCows(res.data);
-    } catch (error) {
-      console.log("Error fetching cows:", error);
+      setCows(res.data.data);
+    } catch {
       toast.error("Failed to fetch cows");
+    }
+  };
+
+  const fetchAlerts = async () => {
+    try {
+      const res = await API.get("/cows/alerts");
+      setAlerts(res.data);
+    } catch {
+      toast.error("Failed to fetch alerts");
     }
   };
 
   useEffect(() => {
     fetchCows();
+    fetchAlerts();
   }, []);
 
   const deleteCow = async (id: string) => {
-    try {
-      await API.delete(`/cows/${id}`);
-      toast.success("Cow deleted successfully!");
-      fetchCows();
-    } catch (error) {
-      console.log("Error deleting cow:", error);
-      toast.error("Failed to delete cow");
-    }
-  };
-
-  const editCow = (cow: Cow) => {
-    setEditingCow(cow); 
-  };
-
-  const clearEdit = () => {
-    setEditingCow(null);
+    await API.delete(`/cows/${id}`);
+    fetchCows();
   };
 
   return (
     <div className="p-6">
-    
-      <Toaster position="top-right" />
+      <Toaster />
 
-      <CowForm fetchCows={fetchCows} editCow={editingCow} clearEdit={clearEdit} />
+      
+      <div className="max-w-2xl mx-auto mb-4">
+        {alerts.map((alert, i) => (
+          <div key={i} className="bg-red-500 text-white p-2 mb-2 rounded">
+            🚨 {alert.message}
+          </div>
+        ))}
+      </div>
 
-      <CowList cows={cows} deleteCow={deleteCow} editCow={editCow} />
+      <CowForm fetchCows={fetchCows} editCow={editingCow} />
+
+      <CowList cows={cows} deleteCow={deleteCow} />
     </div>
   );
 }
