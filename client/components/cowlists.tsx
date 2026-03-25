@@ -4,6 +4,7 @@ type Cow = {
   _id: string;
   name: string;
   age: number;
+  health?: string; 
 };
 
 type Props = {
@@ -21,23 +22,30 @@ export default function CowList({ cows, deleteCow, editCow }: Props) {
         cows.map((cow) => (
           <div
             key={cow._id}
-            className="flex justify-between items-center bg-gray-100 p-4 mb-2 rounded hover:bg-gray-200 transition"
+            className={`flex justify-between items-center p-4 mb-2 rounded ${
+              cow.health === "sick"
+                ? "bg-red-100 border border-red-400"
+                : "bg-gray-100"
+            }`}
           >
-            <span className="text-gray-700 font-medium">
+            <span>
               {cow.name} - {cow.age} years
+              {cow.health === "sick" && (
+                <span className="text-red-500 ml-2 font-semibold">(Sick)</span>
+              )}
             </span>
 
             <div className="flex gap-2">
               <button
                 onClick={() => editCow && editCow(cow)}
-                className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded"
+                className="bg-yellow-400 px-3 py-1 rounded text-white"
               >
                 Edit
               </button>
 
               <button
                 onClick={() => deleteCow(cow._id)}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                className="bg-red-500 px-3 py-1 rounded text-white"
               >
                 Delete
               </button>
