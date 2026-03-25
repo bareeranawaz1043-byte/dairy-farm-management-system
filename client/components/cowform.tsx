@@ -13,6 +13,7 @@ type Props = {
 export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
   const [name, setName] = useState<string>("");
   const [age, setAge] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (editCow) {
@@ -23,27 +24,40 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!name || !age) {
-      toast.error("Please fill all fields");
+
+    // Validation
+    if (!name || !age || Number(age) <= 0) {
+      toast.error("Enter valid name and age");
       return;
     }
 
     try {
+      setLoading(true);
+
       if (editCow) {
-        await API.put(`/cows/${editCow._id}`, { name, age: Number(age) });
+        await API.put(`/cows/${editCow._id}`, {
+          name,
+          age: Number(age),
+        });
         toast.success("Cow updated successfully!");
         clearEdit && clearEdit();
       } else {
-        await API.post("/cows", { name, age: Number(age) });
+        await API.post("/cows", {
+          name,
+          age: Number(age),
+        });
         toast.success("Cow added successfully!");
       }
 
+      // Reset form
       setName("");
       setAge("");
       fetchCows();
     } catch (error) {
-      console.log("Error adding/updating cow:", error);
-      toast.error("Operation failed!");
+      console.error("Error adding/updating cow:", error);
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,6 +73,7 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
         onChange={(e) => setName(e.target.value)}
         className="border p-2 rounded w-full sm:w-1/3 focus:outline-blue-400"
       />
+
       <input
         type="number"
         placeholder="Age"
@@ -66,13 +81,21 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
         onChange={(e) => setAge(e.target.value)}
         className="border p-2 rounded w-full sm:w-1/3 focus:outline-blue-400"
       />
+
       <button
         type="submit"
+        disabled={loading}
         className={`px-4 py-2 rounded w-full sm:w-auto text-white font-semibold ${
-          editCow ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
-        }`}
+          editCow
+            ? "bg-yellow-500 hover:bg-yellow-600"
+            : "bg-blue-500 hover:bg-blue-600"
+        } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
       >
-        {editCow ? "Update Cow" : "Add Cow"}
+        {loading
+          ? "Processing..."
+          : editCow
+          ? "Update Cow"
+          : "Add Cow"}
       </button>
     </form>
   );

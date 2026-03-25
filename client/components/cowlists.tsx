@@ -7,20 +7,18 @@ type Cow = {
 };
 
 type Props = {
-  cows?: any;
+  cows: Cow[];
   deleteCow: (id: string) => void;
   editCow?: (cow: Cow) => void;
 };
 
 export default function CowList({ cows, deleteCow, editCow }: Props) {
-  const cowArray: Cow[] = Array.isArray(cows) ? cows : [];
-
   return (
     <div className="mt-6 w-full max-w-2xl mx-auto">
-      {cowArray.length === 0 ? (
+      {cows.length === 0 ? (
         <p className="text-gray-500 text-center">No cows available.</p>
       ) : (
-        cowArray.map((cow) => (
+        cows.map((cow) => (
           <div
             key={cow._id}
             className="flex justify-between items-center bg-gray-100 p-4 mb-2 rounded hover:bg-gray-200 transition"
