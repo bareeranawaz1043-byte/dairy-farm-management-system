@@ -19,6 +19,7 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
   const [feedType, setFeedType] = useState("");
   const [quantity, setQuantity] = useState("");
   const [date, setDate] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ NEW
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,6 +29,8 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
     }
 
     try {
+      setLoading(true); 
+
       await API.post("/feeding", {
         cow,
         feedType,
@@ -36,6 +39,7 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
       });
 
       toast.success("Feeding added!");
+
       setCow("");
       setFeedType("");
       setQuantity("");
@@ -43,15 +47,20 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
 
       fetchFeeding();
     } catch (error) {
-      console.error(error);
       toast.error("Failed to add feeding");
+    } finally {
+      setLoading(false); 
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-6 flex flex-col gap-3">
+    <form className="bg-white shadow-md rounded-lg p-6 mb-6 flex flex-col gap-3" onSubmit={handleSubmit}>
       
-      <select value={cow} onChange={(e) => setCow(e.target.value)} className="border p-2 rounded">
+      <select
+        value={cow}
+        onChange={(e) => setCow(e.target.value)}
+        className="border p-2 rounded focus:outline-blue-400"
+      >
         <option value="">Select Cow</option>
         {cows.map((c) => (
           <option key={c._id} value={c._id}>
@@ -65,7 +74,7 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
         placeholder="Feed Type"
         value={feedType}
         onChange={(e) => setFeedType(e.target.value)}
-        className="border p-2 rounded"
+        className="border p-2 rounded focus:outline-blue-400"
       />
 
       <input
@@ -73,18 +82,23 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
         placeholder="Quantity (kg)"
         value={quantity}
         onChange={(e) => setQuantity(e.target.value)}
-        className="border p-2 rounded"
+        className="border p-2 rounded focus:outline-blue-400"
       />
 
       <input
         type="date"
         value={date}
         onChange={(e) => setDate(e.target.value)}
-        className="border p-2 rounded"
+        className="border p-2 rounded focus:outline-blue-400"
       />
 
-      <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-        Add Feeding
+      <button
+        disabled={loading}
+        className={`text-white p-2 rounded font-semibold ${
+          loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+        }`}
+      >
+        {loading ? "Adding..." : "Add Feeding"}
       </button>
     </form>
   );
