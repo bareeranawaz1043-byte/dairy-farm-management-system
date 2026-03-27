@@ -4,6 +4,7 @@ import cowRoutes from "./routes/cowroutes.ts";
 import feedingRoutes from "./routes/feedingroutes.ts";
 import { errorHandler } from "./middleware/errorhandler.ts";
 import salesRoutes from "./routes/salesroutes";
+import dashboardRoutes from "./routes/dashboardroutes";
 
 const app = express();
 
@@ -22,4 +23,6 @@ app.get("/", (req, res) => res.send("API is running..."));
 app.use(errorHandler);
 
 app.use("/api/sales", salesRoutes);
+
+app.use("/api/dashboard", dashboardRoutes);
 export default app;
