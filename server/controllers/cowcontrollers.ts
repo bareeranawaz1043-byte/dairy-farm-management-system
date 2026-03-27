@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import Cow from "../models/cow";
+import Cow from "../models/cow.ts";
 
 interface ICowBody {
   name: string;

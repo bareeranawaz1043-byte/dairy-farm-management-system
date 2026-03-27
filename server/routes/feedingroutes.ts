@@ -1,5 +1,5 @@
 import express from "express";
-import { createFeeding, getFeeding } from "../controllers/feedingcontrollers";
+import { createFeeding, getFeeding } from "../controllers/feedingcontrollers.ts";
 
 const router = express.Router();
 
