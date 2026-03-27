@@ -3,6 +3,7 @@ import cors from "cors";
 import cowRoutes from "./routes/cowroutes.ts";
 import feedingRoutes from "./routes/feedingroutes.ts";
 import { errorHandler } from "./middleware/errorhandler.ts";
+import salesRoutes from "./routes/salesroutes";
 
 const app = express();
 
@@ -20,4 +21,5 @@ app.get("/", (req, res) => res.send("API is running..."));
 // Error handler
 app.use(errorHandler);
 
+app.use("/api/sales", salesRoutes);
 export default app;
