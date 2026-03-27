@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import Feeding from "../models/feeding";
-import Cow from "../models/cow";
+import Feeding from "../models/feeding.ts";
+import Cow from "../models/cow.ts";
 
 export const createFeeding = async (req: Request, res: Response) => {
   try {

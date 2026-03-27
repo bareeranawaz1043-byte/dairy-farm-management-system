@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import Milk from "../models/milk";
-import Cow from "../models/cow";
+import Milk from "../models/milk.ts";
+import Cow from "../models/cow.ts";
 
 /**
  * Create a new milk entry

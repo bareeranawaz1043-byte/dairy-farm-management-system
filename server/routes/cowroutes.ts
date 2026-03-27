@@ -6,7 +6,7 @@ import {
   deleteCow,
   getSickCows,
   getAlerts,
-} from "../controllers/cowcontrollers";
+} from "../controllers/cowcontrollers.ts";
 
 const router = express.Router();
 
