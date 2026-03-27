@@ -7,38 +7,38 @@ export const createSale = async (req: Request, res: Response) => {
   try {
     const { cow, quantity, price, date } = req.body;
 
-    // Validation
+    // Runtime validation
     if (!cow || quantity === undefined || price === undefined) {
       return res.status(400).json({
-        message: "Cow, quantity and price are required",
+        success: false,
+        message: "Cow, quantity, and price are required",
       });
     }
 
     if (quantity < 0 || price < 0) {
       return res.status(400).json({
-        message: "Values cannot be negative",
+        success: false,
+        message: "Quantity and price cannot be negative",
       });
     }
 
-    // Check cow exists
+    // Check if cow exists
     const cowExists = await Cow.findById(cow);
     if (!cowExists) {
       return res.status(404).json({
+        success: false,
         message: "Cow not found",
       });
     }
 
-    const sale = await Sale.create({
-      cow,
-      quantity,
-      price,
-      date,
-    });
+    // Create Sale
+    const sale = await Sale.create({ cow, quantity, price, date });
 
-    res.status(201).json(sale);
+    return res.status(201).json({ success: true, data: sale });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
+    console.error("Error creating sale:", error);
+    return res.status(500).json({
+      success: false,
       message: "Failed to create sale",
     });
   }
@@ -47,12 +47,13 @@ export const createSale = async (req: Request, res: Response) => {
 // GET ALL SALES
 export const getSales = async (req: Request, res: Response) => {
   try {
-    const sales = await Sale.find().populate("cow", "name");
+    const sales = await Sale.find().populate("cow", "name age");
 
-    res.status(200).json(sales);
+    return res.status(200).json({ success: true, data: sales });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
+    console.error("Error fetching sales:", error);
+    return res.status(500).json({
+      success: false,
       message: "Failed to fetch sales",
     });
   }
