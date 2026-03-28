@@ -3,16 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import API from "../utils/api";
 import toast from "react-hot-toast";
-
-type Cow = {
-  _id: string;
-  name: string;
-  age: number;
-  breed: string;
-  milkCapacity: number;
-  health?: "healthy" | "sick";
-  vaccination?: string;
-};
+import { Cow } from "../types/cow";
 
 type Props = {
   fetchCows: () => void;

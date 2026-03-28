@@ -1,11 +1,6 @@
 "use client";
 
-type Cow = {
-  _id: string;
-  name: string;
-  age: number;
-  health?: string; 
-};
+import { Cow } from "../types/cow";
 
 type Props = {
   cows?: Cow[]; // optional, defaults to []

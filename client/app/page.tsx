@@ -1,16 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import API from "@/utils/api";
+import API from "../utils/api";
 import toast, { Toaster } from "react-hot-toast";
-import CowForm from "@/components/cowform";
-import CowList from "@/components/cowlists";
-
-type Cow = {
-  _id: string;
-  name: string;
-  age: number;
-};
+import CowForm from "../components/cowform";
+import CowList from "../components/cowlists";
+import { Cow } from "../types/cow";
 
 export default function Home() {
   const [cows, setCows] = useState<Cow[]>([]);
