@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import Cow from "../models/cow";
-import Milk from "../models/milk";
+import Cow from "../models/cow.ts";
+import Milk from "../models/milk.ts";
 
 export const getTotalCows = async (req: Request, res: Response) => {
   try {

@@ -1,5 +1,5 @@
 import express from "express";
-import { getTotalCows,getTotalMilk } from "../controllers/dashboardcontroller";
+import { getTotalCows,getTotalMilk } from "../controllers/dashboardcontroller.ts";
 
 const router = express.Router();
 

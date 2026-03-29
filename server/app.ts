@@ -3,8 +3,8 @@ import cors from "cors";
 import cowRoutes from "./routes/cowroutes.ts";
 import feedingRoutes from "./routes/feedingroutes.ts";
 import { errorHandler } from "./middleware/errorhandler.ts";
-import salesRoutes from "./routes/salesroutes";
-import dashboardRoutes from "./routes/dashboardroutes";
+import salesRoutes from "./routes/salesroutes.ts";
+import dashboardRoutes from "./routes/dashboardroutes.ts";
 
 const app = express();
 

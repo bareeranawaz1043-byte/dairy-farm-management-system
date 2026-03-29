@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import Sale from "../models/sales";
-import Cow from "../models/cow";
+import Sale from "../models/sales.ts";
+import Cow from "../models/cow.ts";
 
 // CREATE SALE
 export const createSale = async (req: Request, res: Response) => {
