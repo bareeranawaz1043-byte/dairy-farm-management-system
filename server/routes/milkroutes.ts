@@ -5,7 +5,7 @@ import {
   getTotalMilk,
   getDailyMilk,
   getMilkPerCow,
-} from "../controllers/milkcontrollers";
+} from "../controllers/milkcontrollers.ts";
 
 const router = express.Router();
 
