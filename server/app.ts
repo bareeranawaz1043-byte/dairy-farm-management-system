@@ -5,6 +5,8 @@ import feedingRoutes from "./routes/feedingroutes.ts";
 import { errorHandler } from "./middleware/errorhandler.ts";
 import salesRoutes from "./routes/salesroutes.ts";
 import dashboardRoutes from "./routes/dashboardroutes.ts";
+import userRoutes from "./routes/userroutes";
+
 
 const app = express();
 
@@ -25,4 +27,6 @@ app.use(errorHandler);
 app.use("/api/sales", salesRoutes);
 
 app.use("/api/dashboard", dashboardRoutes);
+
+app.use("/api/users", userRoutes);
 export default app;
