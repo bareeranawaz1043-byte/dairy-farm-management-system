@@ -12,21 +12,48 @@ export default function Navbar() {
     }
   }, []);
 
+  // ✅ Logout function (Branch 4)
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+
   return (
-    <nav className="bg-gray-800 text-white p-4 flex justify-between">
-      <h1>Dairy Farm</h1>
+    <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
+      
+      <h1 className="text-lg font-bold">Dairy Farm</h1>
 
-      <div className="flex gap-4">
-        <a href="/dashboard">Dashboard</a>
+      <div className="flex gap-4 items-center">
+        <a href="/dashboard" className="hover:text-gray-300">Dashboard</a>
 
+        {/* ✅ Admin Only */}
         {user?.role === "admin" && (
           <>
-            <a href="/cows">Cows</a>
-            <a href="/sales">Sales</a>
+            <a href="/cows" className="hover:text-gray-300">Cows</a>
+            <a href="/sales" className="hover:text-gray-300">Sales</a>
           </>
         )}
 
-        <a href="/milk">Milk</a>
+        {/* ✅ Available for all */}
+        <a href="/milk" className="hover:text-gray-300">Milk</a>
+
+        {/* ✅ Show user role */}
+        {user && (
+          <span className="text-sm bg-gray-700 px-2 py-1 rounded">
+            {user.role}
+          </span>
+        )}
+
+        {/* ✅ Logout Button */}
+        {user && (
+          <button
+            onClick={logout}
+            className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm"
+          >
+            Logout
+          </button>
+        )}
       </div>
     </nav>
   );
