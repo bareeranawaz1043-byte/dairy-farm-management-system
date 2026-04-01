@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 type Props = {
-  onFilter: (month: string, year: string) => void;
+  onFilter: (month: string, year: string) => void; // ensure type matches
 };
 
 export default function DashboardFilters({ onFilter }: Props) {
@@ -26,7 +26,9 @@ export default function DashboardFilters({ onFilter }: Props) {
         }}
         className="border p-1 rounded"
       />
-      <button type="submit" className="bg-blue-500 text-white p-1 rounded">Filter</button>
+      <button type="submit" className="bg-blue-500 text-white p-1 rounded">
+        Filter
+      </button>
     </form>
   );
 }
