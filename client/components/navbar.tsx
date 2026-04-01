@@ -32,6 +32,7 @@ export default function Navbar() {
           <>
             <a href="/cows" className="hover:text-gray-300">Cows</a>
             <a href="/sales" className="hover:text-gray-300">Sales</a>
+            <a href="/workers" className="hover:text-gray-300">Workers</a>
           </>
         )}
 
