@@ -7,19 +7,14 @@ import {
   getSickCows,
   getAlerts,
 } from "../controllers/cowcontrollers.ts";
-import { protect } from "../middleware/authmiddleware";
+import { protect } from "../middleware/authmiddleware.ts";
 const router = express.Router();
 
-router.post("/", createCow);
+router.post("/", protect, createCow);
 router.get("/", getCows);
-router.put("/:id", updateCow);
-router.delete("/:id", deleteCow);
+router.put("/:id", protect, updateCow);
+router.delete("/:id", protect, deleteCow);
 router.get("/sick", getSickCows);
 router.get("/alerts", getAlerts);
-
-
-router.post("/", protect, createCow);
-router.delete("/:id", protect, deleteCow);
-router.put("/:id", protect, updateCow);
 
 export default router;
