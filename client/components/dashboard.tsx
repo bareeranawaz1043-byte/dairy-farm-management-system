@@ -5,7 +5,7 @@ import API from "../utils/api";
 import toast from "react-hot-toast";
 import { FaCrow, FaMoneyBill, FaExclamationTriangle } from "react-icons/fa";
 import { GiMilkCarton } from "react-icons/gi";
-import DashboardFilters from "./dashboardfilters"; // NEW
+import DashboardFilters from "./dashboardfilters"; 
 
 export default function Dashboard() {
   const [data, setData] = useState({
