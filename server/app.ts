@@ -5,7 +5,8 @@ import feedingRoutes from "./routes/feedingroutes.ts";
 import { errorHandler } from "./middleware/errorhandler.ts";
 import salesRoutes from "./routes/salesroutes.ts";
 import dashboardRoutes from "./routes/dashboardroutes.ts";
-import userRoutes from "./routes/userroutes";
+import userRoutes from "./routes/userroutes.ts";
+import milkRoutes from "./routes/milkroutes.ts";
 
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.json());
 // Routes
 app.use("/api/cows", cowRoutes);
 app.use("/api/feeding", feedingRoutes);
+app.use("/api/milk", milkRoutes);
 
 // Root route
 app.get("/", (req, res) => res.send("API is running..."));
