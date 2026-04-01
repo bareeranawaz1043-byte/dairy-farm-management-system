@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import API from "../utils/api";
 import toast from "react-hot-toast";
 import { FaCrow, FaMoneyBill, FaExclamationTriangle } from "react-icons/fa";
 import { GiMilkCarton } from "react-icons/gi";
-import DashboardFilters from "./dashboardfilters"; 
+import DashboardFilters from "./dashboardfilters";
 
 export default function Dashboard() {
   const [data, setData] = useState({
@@ -15,25 +14,30 @@ export default function Dashboard() {
     alerts: 0,
   });
 
-  const [milkEntries, setMilkEntries] = useState<any[]>([]); // NEW
-  const [totalQuantity, setTotalQuantity] = useState(0); // NEW
-
+  const [totalQuantity, setTotalQuantity] = useState(0);
+  const [milkEntries, setMilkEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch dashboard totals
   const fetchDashboard = async () => {
     try {
-      const [cows, milk, sales, alerts] = await Promise.all([
-        API.get("/dashboard/total-cows"),
-        API.get("/dashboard/total-milk"),
-        API.get("/dashboard/total-sales"),
-        API.get("/dashboard/alerts"),
+      const [cowsRes, milkRes, salesRes, alertsRes] = await Promise.all([
+        fetch("/api/dashboard/total-cows"),
+        fetch("/api/dashboard/total-milk"),
+        fetch("/api/dashboard/total-sales"),
+        fetch("/api/dashboard/alerts"),
       ]);
 
+      const cows = await cowsRes.json();
+      const milk = await milkRes.json();
+      const sales = await salesRes.json();
+      const alerts = await alertsRes.json();
+
       setData({
-        cows: cows.data.totalCows,
-        milk: milk.data.totalMilk,
-        sales: sales.data.totalSales,
-        alerts: alerts.data.alerts.length,
+        cows: cows.totalCows || 0,
+        milk: milk.totalMilk || 0,
+        sales: sales.totalSales || 0,
+        alerts: alerts.alerts?.length || 0,
       });
     } catch (error) {
       console.error(error);
@@ -43,15 +47,16 @@ export default function Dashboard() {
     }
   };
 
-  // NEW: fetch monthly report
+  // Handle monthly filter
   const handleFilter = async (month: string, year: string) => {
     try {
-      const res = await API.get(`/dashboard/monthly?month=${month}&year=${year}`);
-      setTotalQuantity(res.data.totalQuantity);
-      setMilkEntries(res.data.entries);
+      const res = await fetch(`/api/dashboard/monthly?month=${month}&year=${year}`);
+      const data = await res.json();
+      setTotalQuantity(data.totalQuantity);
+      setMilkEntries(data.entries);
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to load monthly report");
+      console.error("Error fetching monthly report:", err);
+      toast.error("Failed to fetch monthly report");
     }
   };
 
@@ -69,7 +74,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      
+
       {/* Filter */}
       <DashboardFilters onFilter={handleFilter} />
 
@@ -80,6 +85,7 @@ export default function Dashboard() {
         </p>
       )}
 
+      {/* Dashboard cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
         {/* Total Cows */}
         <div className="bg-blue-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
@@ -118,7 +124,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* NEW: Monthly milk cards */}
+      {/* Monthly milk cards */}
       {milkEntries.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {milkEntries.map((entry) => (
