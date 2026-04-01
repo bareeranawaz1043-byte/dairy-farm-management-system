@@ -12,11 +12,11 @@ type Props = {
 };
 
 export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
-  const [name, setName] = useState<string>("");
-  const [age, setAge] = useState<string>("");
-  const [breed, setBreed] = useState<string>("");
-  const [milkCapacity, setMilkCapacity] = useState<string>(""); 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [breed, setBreed] = useState("");
+  const [milkCapacity, setMilkCapacity] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (editCow) {
@@ -43,12 +43,14 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
       Number(age) <= 0 ||
       Number(milkCapacity) <= 0
     ) {
-      toast.error("Please fill all required fields with valid values");
+      toast.error("Please fill all fields correctly");
       return;
     }
 
     try {
       setLoading(true);
+
+      const token = localStorage.getItem("token"); // ✅ GET TOKEN
 
       const payload = {
         name: name.trim(),
@@ -57,12 +59,18 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
         milkCapacity: Number(milkCapacity),
       };
 
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ SEND TOKEN
+        },
+      };
+
       if (editCow) {
-        await API.put(`/cows/${editCow._id}`, payload);
+        await API.put(`/cows/${editCow._id}`, payload, config);
         toast.success("Cow updated successfully!");
         clearEdit && clearEdit();
       } else {
-        await API.post("/cows", payload);
+        await API.post("/cows", payload, config); // ✅ FIXED
         toast.success("Cow added successfully!");
       }
 
@@ -73,7 +81,10 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
       fetchCows();
     } catch (error: any) {
       console.error("Error:", error);
-      if (error.response?.data?.message) {
+
+      if (error.response?.status === 401) {
+        toast.error("Unauthorized! Please login again");
+      } else if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
         toast.error("Something went wrong");
@@ -94,8 +105,7 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
           placeholder="Cow Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="border p-2 rounded flex-1 min-w-[150px] focus:outline-blue-400"
-          required
+          className="border p-2 rounded flex-1 min-w-[150px]"
         />
 
         <input
@@ -103,9 +113,7 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
           placeholder="Age"
           value={age}
           onChange={(e) => setAge(e.target.value)}
-          className="border p-2 rounded flex-1 min-w-[100px] focus:outline-blue-400"
-          min={0}
-          required
+          className="border p-2 rounded flex-1 min-w-[100px]"
         />
 
         <input
@@ -113,30 +121,25 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
           placeholder="Breed"
           value={breed}
           onChange={(e) => setBreed(e.target.value)}
-          className="border p-2 rounded flex-1 min-w-[150px] focus:outline-blue-400"
-          required
+          className="border p-2 rounded flex-1 min-w-[150px]"
         />
 
         <input
           type="number"
-          placeholder="Milk Capacity (L)"
+          placeholder="Milk Capacity"
           value={milkCapacity}
           onChange={(e) => setMilkCapacity(e.target.value)}
-          className="border p-2 rounded flex-1 min-w-[120px] focus:outline-blue-400"
-          min={0}
-          required
+          className="border p-2 rounded flex-1 min-w-[120px]"
         />
 
         <button
           type="submit"
           disabled={loading}
-          className={`px-4 py-2 rounded text-white font-semibold ${
-            editCow
-              ? "bg-yellow-500 hover:bg-yellow-600"
-              : "bg-blue-500 hover:bg-blue-600"
-          } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`px-4 py-2 rounded text-white ${
+            editCow ? "bg-yellow-500" : "bg-blue-500"
+          } ${loading ? "opacity-50" : ""}`}
         >
-          {loading ? "Processing..." : editCow ? "Update Cow" : "Add Cow"}
+          {loading ? "Processing..." : editCow ? "Update" : "Add"}
         </button>
       </div>
     </form>

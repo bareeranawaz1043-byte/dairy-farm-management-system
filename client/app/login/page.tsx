@@ -1,44 +1,64 @@
 "use client";
 
 import { useState } from "react";
-import API from "../../utils/api";
-import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import API from "../../utils/api";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: any) => {
     e.preventDefault();
 
-    try {
-      const res = await API.post("/users/login", { email, password });
+    if (!email || !password) {
+      toast.error("Please fill all fields");
+      return;
+    }
 
+    try {
+      setLoading(true);
+
+      // ✅ FIXED ROUTE
+      const res = await API.post("/users/login", {
+        email,
+        password,
+      });
+
+      // ✅ SAVE
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      toast.success("Login successful");
+      toast.success("Login successful!");
 
+      // ✅ redirect
       router.push("/dashboard");
-    } catch (error) {
-      toast.error("Invalid credentials");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <Toaster position="top-right" />
+
       <form
         onSubmit={handleLogin}
-        className="bg-white p-6 rounded shadow w-80 flex flex-col gap-3"
+        className="bg-white p-6 rounded shadow-md w-80"
       >
-        <h2 className="text-xl font-bold text-center">Login</h2>
+        <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
 
         <input
           type="email"
           placeholder="Email"
-          className="border p-2 rounded"
+          className="w-full border p-2 mb-3 rounded"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -46,13 +66,17 @@ export default function LoginPage() {
         <input
           type="password"
           placeholder="Password"
-          className="border p-2 rounded"
+          className="w-full border p-2 mb-3 rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="bg-blue-500 text-white p-2 rounded">
-          Login
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-500 text-white p-2 rounded"
+        >
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>
