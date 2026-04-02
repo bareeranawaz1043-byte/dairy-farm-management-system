@@ -18,7 +18,7 @@ export default function Dashboard() {
   const [milkEntries, setMilkEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch dashboard totals
+  
   const fetchDashboard = async () => {
     try {
       const [cowsRes, milkRes, salesRes, alertsRes] = await Promise.all([
@@ -47,7 +47,7 @@ export default function Dashboard() {
     }
   };
 
-  // Handle monthly filter
+  
   const handleFilter = async (month: string, year: string) => {
     try {
       const res = await fetch(`/api/dashboard/monthly?month=${month}&year=${year}`);
@@ -64,30 +64,30 @@ export default function Dashboard() {
     fetchDashboard();
   }, []);
 
+  
   if (loading) {
     return (
-      <p className="text-center mt-10 text-gray-500 text-lg">
-        Loading Dashboard...
-      </p>
+      <div className="flex justify-center items-center h-40">
+        <p className="text-gray-500 text-lg animate-pulse">
+          Loading Dashboard...
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="p-6 space-y-6">
 
-      {/* Filter */}
+      
       <DashboardFilters onFilter={handleFilter} />
 
-      {/* Total Milk for selected month */}
       {totalQuantity > 0 && (
         <p className="text-center font-bold mt-2 text-lg">
           Total Milk for selected month: {totalQuantity} L
         </p>
       )}
-
-      {/* Dashboard cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
-        {/* Total Cows */}
+        
         <div className="bg-blue-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Cows</h2>
@@ -96,7 +96,6 @@ export default function Dashboard() {
           <FaCrow size={30} />
         </div>
 
-        {/* Total Milk */}
         <div className="bg-green-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Milk</h2>
@@ -105,7 +104,6 @@ export default function Dashboard() {
           <GiMilkCarton size={30} />
         </div>
 
-        {/* Total Sales */}
         <div className="bg-purple-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Sales</h2>
@@ -114,7 +112,6 @@ export default function Dashboard() {
           <FaMoneyBill size={30} />
         </div>
 
-        {/* Alerts */}
         <div className="bg-red-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Alerts</h2>
@@ -124,7 +121,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Monthly milk cards */}
       {milkEntries.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {milkEntries.map((entry) => (
@@ -135,6 +131,12 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+      )}
+
+      {milkEntries.length === 0 && totalQuantity > 0 && (
+        <p className="text-center text-gray-500 mt-4">
+          No milk records found for selected month
+        </p>
       )}
     </div>
   );
