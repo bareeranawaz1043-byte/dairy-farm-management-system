@@ -6,6 +6,16 @@ import { FaCrow, FaMoneyBill, FaExclamationTriangle } from "react-icons/fa";
 import { GiMilkCarton } from "react-icons/gi";
 import DashboardFilters from "./dashboardfilters";
 
+// ✅ Added proper TypeScript type (Branch 5)
+type MilkEntry = {
+  _id: string;
+  quantity: number;
+  date: string;
+  cow: {
+    name: string;
+  };
+};
+
 export default function Dashboard() {
   const [data, setData] = useState({
     cows: 0,
@@ -15,7 +25,9 @@ export default function Dashboard() {
   });
 
   const [totalQuantity, setTotalQuantity] = useState(0);
-  const [milkEntries, setMilkEntries] = useState<any[]>([]);
+
+  const [milkEntries, setMilkEntries] = useState<MilkEntry[]>([]);
+
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = async () => {
