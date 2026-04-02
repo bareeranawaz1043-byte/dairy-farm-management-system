@@ -18,7 +18,6 @@ export default function Dashboard() {
   const [milkEntries, setMilkEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch dashboard totals
   const fetchDashboard = async () => {
     try {
       const [cowsRes, milkRes, salesRes, alertsRes] = await Promise.all([
@@ -47,7 +46,6 @@ export default function Dashboard() {
     }
   };
 
-  // ✅ Improved Error Handling (Branch 2)
   const handleFilter = async (month: string, year: string) => {
     try {
       if (!month || !year) {
@@ -74,7 +72,6 @@ export default function Dashboard() {
     fetchDashboard();
   }, []);
 
-  // ✅ Improved Loading UI (Branch 1)
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
@@ -88,20 +85,17 @@ export default function Dashboard() {
   return (
     <div className="p-6 space-y-6">
 
-      {/* Filter */}
       <DashboardFilters onFilter={handleFilter} />
 
-      {/* Total Milk */}
       {totalQuantity > 0 && (
         <p className="text-center font-bold mt-2 text-lg">
           Total Milk for selected month: {totalQuantity} L
         </p>
       )}
 
-      {/* Dashboard Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
-        {/* Total Cows */}
-        <div className="bg-blue-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
+
+        <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Cows</h2>
             <p className="text-2xl font-bold">{data.cows}</p>
@@ -109,8 +103,7 @@ export default function Dashboard() {
           <FaCrow size={30} />
         </div>
 
-        {/* Total Milk */}
-        <div className="bg-green-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
+        <div className="bg-green-500 text-white p-6 rounded-2xl shadow-md flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Milk</h2>
             <p className="text-2xl font-bold">{data.milk} L</p>
@@ -118,8 +111,7 @@ export default function Dashboard() {
           <GiMilkCarton size={30} />
         </div>
 
-        {/* Total Sales */}
-        <div className="bg-purple-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
+        <div className="bg-purple-500 text-white p-6 rounded-2xl shadow-md flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Sales</h2>
             <p className="text-2xl font-bold">Rs {data.sales}</p>
@@ -127,8 +119,7 @@ export default function Dashboard() {
           <FaMoneyBill size={30} />
         </div>
 
-        {/* Alerts */}
-        <div className="bg-red-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
+        <div className="bg-red-500 text-white p-6 rounded-2xl shadow-md flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Alerts</h2>
             <p className="text-2xl font-bold">{data.alerts}</p>
@@ -137,11 +128,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Monthly Milk Cards */}
       {milkEntries.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {milkEntries.map((entry) => (
-            <div key={entry._id} className="p-4 border rounded shadow-sm bg-white">
+            <div key={entry._id} className="p-4 border rounded-2xl shadow-sm bg-white hover:shadow-md transition">
               <h3 className="font-semibold">{entry.cow.name}</h3>
               <p>Quantity: {entry.quantity} L</p>
               <p>Date: {new Date(entry.date).toLocaleDateString()}</p>
@@ -150,7 +140,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ✅ Empty State (Branch 1) */}
       {milkEntries.length === 0 && totalQuantity > 0 && (
         <p className="text-center text-gray-500 mt-4">
           No milk records found for selected month
