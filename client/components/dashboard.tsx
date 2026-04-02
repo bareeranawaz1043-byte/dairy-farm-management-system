@@ -18,7 +18,7 @@ export default function Dashboard() {
   const [milkEntries, setMilkEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  
+  // Fetch dashboard totals
   const fetchDashboard = async () => {
     try {
       const [cowsRes, milkRes, salesRes, alertsRes] = await Promise.all([
@@ -47,16 +47,26 @@ export default function Dashboard() {
     }
   };
 
-  
+  // ✅ Improved Error Handling (Branch 2)
   const handleFilter = async (month: string, year: string) => {
     try {
+      if (!month || !year) {
+        toast.error("Please select a valid month");
+        return;
+      }
+
       const res = await fetch(`/api/dashboard/monthly?month=${month}&year=${year}`);
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Error fetching data");
+      }
+
       setTotalQuantity(data.totalQuantity);
       setMilkEntries(data.entries);
-    } catch (err) {
-      console.error("Error fetching monthly report:", err);
-      toast.error("Failed to fetch monthly report");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Something went wrong");
     }
   };
 
@@ -64,7 +74,7 @@ export default function Dashboard() {
     fetchDashboard();
   }, []);
 
-  
+  // ✅ Improved Loading UI (Branch 1)
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
@@ -78,16 +88,19 @@ export default function Dashboard() {
   return (
     <div className="p-6 space-y-6">
 
-      
+      {/* Filter */}
       <DashboardFilters onFilter={handleFilter} />
 
+      {/* Total Milk */}
       {totalQuantity > 0 && (
         <p className="text-center font-bold mt-2 text-lg">
           Total Milk for selected month: {totalQuantity} L
         </p>
       )}
+
+      {/* Dashboard Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
-        
+        {/* Total Cows */}
         <div className="bg-blue-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Cows</h2>
@@ -96,6 +109,7 @@ export default function Dashboard() {
           <FaCrow size={30} />
         </div>
 
+        {/* Total Milk */}
         <div className="bg-green-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Milk</h2>
@@ -104,6 +118,7 @@ export default function Dashboard() {
           <GiMilkCarton size={30} />
         </div>
 
+        {/* Total Sales */}
         <div className="bg-purple-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Total Sales</h2>
@@ -112,6 +127,7 @@ export default function Dashboard() {
           <FaMoneyBill size={30} />
         </div>
 
+        {/* Alerts */}
         <div className="bg-red-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between hover:scale-105 transition duration-300">
           <div>
             <h2 className="text-lg">Alerts</h2>
@@ -121,6 +137,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Monthly Milk Cards */}
       {milkEntries.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {milkEntries.map((entry) => (
@@ -133,6 +150,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* ✅ Empty State (Branch 1) */}
       {milkEntries.length === 0 && totalQuantity > 0 && (
         <p className="text-center text-gray-500 mt-4">
           No milk records found for selected month
