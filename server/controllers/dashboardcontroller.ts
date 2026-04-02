@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import Cow from "../models/cow.ts";
 import Milk from "../models/milk.ts";
 
-// Total cows
+
 export const getTotalCows = async (req: Request, res: Response) => {
   try {
     const total = await Cow.countDocuments();
@@ -19,7 +19,7 @@ export const getTotalCows = async (req: Request, res: Response) => {
   }
 };
 
-// Total milk
+
 export const getTotalMilk = async (req: Request, res: Response) => {
   try {
     const result = await Milk.aggregate([
@@ -36,15 +36,24 @@ export const getTotalMilk = async (req: Request, res: Response) => {
       totalMilk: result[0]?.totalMilk || 0,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error fetching milk total" });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching milk total",
+    });
   }
 };
 
-// Monthly milk report
+
 export const getMonthlyReport = async (req: Request, res: Response) => {
   try {
     const { month, year } = req.query;
-    if (!month || !year) return res.status(400).json({ message: "Month and year required" });
+
+    if (!month || !year) {
+      return res.status(400).json({
+        success: false,
+        message: "Month and year are required",
+      });
+    }
 
     const start = new Date(`${year}-${month}-01`);
     const end = new Date(start);
@@ -55,10 +64,27 @@ export const getMonthlyReport = async (req: Request, res: Response) => {
       "quantity date cow"
     ).populate("cow", "name");
 
-    const totalQuantity = milkData.reduce((sum, entry) => sum + entry.quantity, 0);
+    if (milkData.length === 0) {
+      return res.status(200).json({
+        totalQuantity: 0,
+        entries: [],
+        message: "No data found for this month",
+      });
+    }
 
-    res.status(200).json({ totalQuantity, entries: milkData });
+    const totalQuantity = milkData.reduce(
+      (sum, entry) => sum + entry.quantity,
+      0
+    );
+
+    res.status(200).json({
+      totalQuantity,
+      entries: milkData,
+    });
   } catch (err) {
-    res.status(500).json({ message: "Server Error", error: err });
+    res.status(500).json({
+      message: "Server Error",
+      error: err,
+    });
   }
 };
