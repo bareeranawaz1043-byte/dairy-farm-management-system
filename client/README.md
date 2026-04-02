@@ -34,3 +34,42 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+##  Dairy Farm Management System (Frontend)
+
+This project is a dairy farm management system built with Next.js.
+
+---
+
+##  Features
+
+- Cow Management
+- Milk Tracking
+- Feeding System
+- Sales Management
+- Dashboard Analytics
+
+---
+
+##  Dashboard Features
+
+- View total cows, milk, sales, alerts
+- Filter milk data by month
+- View monthly milk records
+- Handles empty data and errors
+
+---
+
+## 🛠 Tech Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+---
+
+## 🌐 Deployment
+
+Frontend deployed on Vercel (Coming Soon 🚀)
