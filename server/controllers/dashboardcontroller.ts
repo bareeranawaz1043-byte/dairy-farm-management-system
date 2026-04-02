@@ -23,12 +23,7 @@ export const getTotalCows = async (req: Request, res: Response) => {
 export const getTotalMilk = async (req: Request, res: Response) => {
   try {
     const result = await Milk.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalMilk: { $sum: "$quantity" },
-        },
-      },
+      { $group: { _id: null, totalMilk: { $sum: "$quantity" } } },
     ]);
 
     res.status(200).json({
@@ -48,6 +43,7 @@ export const getMonthlyReport = async (req: Request, res: Response) => {
   try {
     const { month, year } = req.query;
 
+
     if (!month || !year) {
       return res.status(400).json({
         success: false,
@@ -64,6 +60,7 @@ export const getMonthlyReport = async (req: Request, res: Response) => {
       "quantity date cow"
     ).populate("cow", "name");
 
+    
     if (milkData.length === 0) {
       return res.status(200).json({
         totalQuantity: 0,
@@ -72,10 +69,12 @@ export const getMonthlyReport = async (req: Request, res: Response) => {
       });
     }
 
+
     const totalQuantity = milkData.reduce(
       (sum, entry) => sum + entry.quantity,
       0
     );
+
 
     res.status(200).json({
       totalQuantity,
