@@ -1,6 +1,6 @@
-// middleware/authmiddleware.ts
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import User from "../models/user";
 
 // Extend Request type to include user
 interface AuthRequest extends Request {
@@ -8,24 +8,33 @@ interface AuthRequest extends Request {
 }
 
 // PROTECT ROUTES
-export const protect = (
+export const protect = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
+  let token;
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    if (req.headers.authorization?.startsWith("Bearer")) {
+      token = req.headers.authorization.split(" ")[1];
 
-    if (!token) {
-      return res.status(401).json({ message: "Not authorized" });
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+
+      // Fetch full user from DB excluding password
+      const user = await User.findById(decoded.id).select("-password");
+
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      req.user = user;
+      next();
+    } else {
+      return res.status(401).json({ message: "Not authorized, token missing" });
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    req.user = decoded;
-
-    next();
   } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
+    console.error(error);
+    return res.status(401).json({ message: "Invalid token" });
   }
 };
 
