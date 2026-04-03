@@ -28,14 +28,21 @@ export default function Home() {
   }, []);
 
   const fetchCows = async () => {
-    try {
-      const res = await API.get("/cows");
-      setCows(res.data);
-    } catch (error) {
-      console.log("Error fetching cows:", error);
-      toast.error("Failed to fetch cows");
-    }
-  };
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await API.get("/cows", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setCows(res.data);
+  } catch (error) {
+    console.log("Error fetching cows:", error);
+    toast.error("Failed to fetch cows");
+  }
+};
 
   const deleteCow = async (id: string) => {
     try {
