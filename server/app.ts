@@ -14,10 +14,10 @@ app.use("/api/cows", cowRoutes);
 app.use("/api/feeding", feedingRoutes);
 app.use("/api/milk", milkRoutes);
 app.get("/", (req, res) => res.send("API is running..."));
-app.use(errorHandler);
 app.use("/api/sales", salesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use(errorHandler);
 
 export default app;
