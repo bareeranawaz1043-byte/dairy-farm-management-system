@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import API from "@/utils/api";
+import API from "../utils/api";
 import toast, { Toaster } from "react-hot-toast";
 import MilkForm from "./milkform";
 import MilkList from "./milklists";
