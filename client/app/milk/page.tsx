@@ -1,6 +1,6 @@
 "use client";
 
-import MilkManagement from "@/components/milkmanagement";
+import MilkManagement from "../../components/milkmanagement";
 
 export default function MilkPage() {
   return <MilkManagement />;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, FormEvent } from "react";
-import API from "@/utils/api";
+import API from "../utils/api";
 import toast from "react-hot-toast";
 
 type Cow = {
@@ -20,11 +20,21 @@ export default function MilkForm({ fetchMilk }: Props) {
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Fetch cows
+  // ✅ Fetch cows (FIXED)
   const fetchCows = async () => {
     try {
       const res = await API.get("/cows");
-      setCows(res.data);
+
+      console.log("COWS API RESPONSE:", res.data); // ✅ DEBUG
+
+      // ✅ Handle both cases (array OR object)
+      if (Array.isArray(res.data.data)) {
+        setCows(res.data.data);
+      } else if (Array.isArray(res.data.cows)) {
+        setCows(res.data.cows);
+      } else {
+        setCows([]); // fallback
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to load cows");
@@ -68,7 +78,8 @@ export default function MilkForm({ fetchMilk }: Props) {
   };
 
   return (
-    <form className="bg-white shadow-md p-6 rounded-lg flex flex-col sm:flex-row gap-3 justify-center items-center max-w-3xl mx-auto mb-6"
+    <form
+      className="bg-white shadow-md p-6 rounded-lg flex flex-col sm:flex-row gap-3 justify-center items-center max-w-3xl mx-auto mb-6"
       onSubmit={handleSubmit}
     >
       <select
@@ -77,11 +88,14 @@ export default function MilkForm({ fetchMilk }: Props) {
         className="border p-2 rounded w-full sm:w-1/4"
       >
         <option value="">Select Cow</option>
-        {cows.map((c) => (
-          <option key={c._id} value={c._id}>
-            {c.name}
-          </option>
-        ))}
+
+        {/* ✅ SAFE MAP FIX */}
+        {Array.isArray(cows) &&
+          cows.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.name}
+            </option>
+          ))}
       </select>
 
       <input

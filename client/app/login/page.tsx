@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import API from "../../utils/api";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -23,13 +24,14 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      // ✅ FIXED ROUTE
       const res = await API.post("/users/login", {
         email,
         password,
       });
 
-      // ✅ SAVE
+      console.log("LOGIN RESPONSE:", res.data); // ✅ DEBUG
+
+      // ✅ SAVE DATA
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
@@ -37,9 +39,13 @@ export default function LoginPage() {
 
       // ✅ redirect
       router.push("/dashboard");
+
     } catch (error: any) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Login failed");
+      console.log("FULL ERROR:", error.response); // ✅ DEBUG
+
+      toast.error(
+        error.response?.data?.message || "Login failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -78,6 +84,16 @@ export default function LoginPage() {
         >
           {loading ? "Logging in..." : "Login"}
         </button>
+
+        {/* ✅ SIGNUP LINK */}
+        <p className="text-center mt-4 text-sm">
+          Don't have an account?{" "}
+          <Link href="/signup">
+            <span className="text-blue-600 cursor-pointer hover:underline">
+              Sign Up
+            </span>
+          </Link>
+        </p>
       </form>
     </div>
   );
