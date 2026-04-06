@@ -22,26 +22,27 @@ type MilkPerCow = {
 
 export default function MilkManagement() {
   const [milk, setMilk] = useState<Milk[]>([]);
-  const [totalMilk, setTotalMilk] = useState<number>(0);
-  const [dailyMilk, setDailyMilk] = useState<number>(0);
+  const [totalMilk, setTotalMilk] = useState(0);
+  const [dailyMilk, setDailyMilk] = useState(0);
   const [milkPerCow, setMilkPerCow] = useState<MilkPerCow[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch all milk entries
   const fetchMilk = async () => {
     try {
       setLoading(true);
       const res = await API.get("/milk");
-      setMilk(res.data);
-      setLoading(false);
+
+      const milkData = res.data?.data || res.data || [];
+      setMilk(Array.isArray(milkData) ? milkData : []);
+
     } catch (error) {
-      setLoading(false);
       console.error(error);
       toast.error("Failed to fetch milk");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Fetch stats for Day 7
   const fetchStats = async () => {
     try {
       const [totalRes, dailyRes, perCowRes] = await Promise.all([
@@ -50,9 +51,9 @@ export default function MilkManagement() {
         API.get("/milk/per-cow"),
       ]);
 
-      setTotalMilk(totalRes.data.totalMilk);
-      setDailyMilk(dailyRes.data.dailyMilk);
-      setMilkPerCow(perCowRes.data);
+      setTotalMilk(totalRes.data?.totalMilk || 0);
+      setDailyMilk(dailyRes.data?.dailyMilk || 0);
+      setMilkPerCow(perCowRes.data || []);
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch stats");
@@ -65,37 +66,50 @@ export default function MilkManagement() {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50 min-h-screen">
       <Toaster position="top-right" />
+
+      <h1 className="text-3xl font-bold text-center mb-6">
+        🥛 Milk Management Dashboard
+      </h1>
 
       <MilkForm fetchMilk={fetchMilk} />
 
-      <MilkList milk={milk} />
+      {loading ? (
+        <p className="text-center text-gray-500">Loading milk data...</p>
+      ) : (
+        <MilkList milk={milk} />
+      )}
 
-      {/* Stats Section */}
-      <div className="mt-8 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-blue-500 text-white p-4 rounded shadow">
-          <h3 className="text-lg font-semibold">Total Milk</h3>
-          <p className="text-2xl font-bold">{totalMilk} L</p>
+      {/* 📊 STATS */}
+      <div className="mt-8 max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <div className="bg-blue-500 text-white p-5 rounded-xl shadow">
+          <h3 className="text-lg">Total Milk</h3>
+          <p className="text-3xl font-bold">{totalMilk} L</p>
         </div>
 
-        <div className="bg-green-500 text-white p-4 rounded shadow">
-          <h3 className="text-lg font-semibold">Today's Milk</h3>
-          <p className="text-2xl font-bold">{dailyMilk} L</p>
+        <div className="bg-green-500 text-white p-5 rounded-xl shadow">
+          <h3 className="text-lg">Today's Milk</h3>
+          <p className="text-3xl font-bold">{dailyMilk} L</p>
         </div>
 
-        <div className="bg-yellow-500 text-white p-4 rounded shadow col-span-1 sm:col-span-2 lg:col-span-3">
-          <h3 className="text-lg font-semibold mb-2">Milk Per Cow</h3>
+        <div className="bg-yellow-500 text-white p-5 rounded-xl shadow col-span-1 sm:col-span-2 lg:col-span-3">
+          <h3 className="text-lg mb-2">Milk Per Cow</h3>
+
           <div className="flex flex-wrap gap-2">
-            {milkPerCow.length === 0 && <p>No cow stats available</p>}
-            {milkPerCow.map((cow) => (
-              <span
-                key={cow.cowName}
-                className="bg-white text-gray-800 px-3 py-1 rounded shadow"
-              >
-                {cow.cowName}: {cow.totalMilk} L
-              </span>
-            ))}
+            {milkPerCow.length === 0 ? (
+              <p>No data available</p>
+            ) : (
+              milkPerCow.map((cow) => (
+                <span
+                  key={cow.cowName}
+                  className="bg-white text-gray-800 px-3 py-1 rounded shadow text-sm"
+                >
+                  {cow.cowName}: {cow.totalMilk} L
+                </span>
+              ))
+            )}
           </div>
         </div>
       </div>
