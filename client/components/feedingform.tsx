@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import API from "@/utils/api";
+import API from "../utils/api";
 import toast from "react-hot-toast";
 
 type Cow = {
@@ -19,26 +19,36 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
   const [feedType, setFeedType] = useState("");
   const [quantity, setQuantity] = useState("");
   const [date, setDate] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ NEW
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!cow || !feedType || !quantity) {
-      return toast.error("All fields are required");
+    if (!cow || !feedType || !quantity || Number(quantity) <= 0) {
+      return toast.error("Please enter valid data");
     }
 
     try {
-      setLoading(true); 
+      setLoading(true);
 
-      await API.post("/feeding", {
-        cow,
-        feedType,
-        quantity: Number(quantity),
-        date,
-      });
+      const token = localStorage.getItem("token");
 
-      toast.success("Feeding added!");
+      await API.post(
+        "/feeding",
+        {
+          cow,
+          feedType: feedType.trim(),
+          quantity: Number(quantity),
+          date: date || new Date(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success("Feeding record added!");
 
       setCow("");
       setFeedType("");
@@ -46,20 +56,30 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
       setDate("");
 
       fetchFeeding();
-    } catch (error) {
-      toast.error("Failed to add feeding");
+
+    } catch (error: any) {
+      console.error(error);
+
+      if (error.response?.status === 401) {
+        toast.error("Unauthorized! Please login again");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to add feeding");
+      }
+
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
   return (
-    <form className="bg-white shadow-md rounded-lg p-6 mb-6 flex flex-col gap-3" onSubmit={handleSubmit}>
-      
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white shadow-lg p-6 rounded-xl flex flex-col sm:flex-row gap-3 items-center justify-center max-w-4xl mx-auto mb-6"
+    >
       <select
         value={cow}
         onChange={(e) => setCow(e.target.value)}
-        className="border p-2 rounded focus:outline-blue-400"
+        className="border p-2 rounded w-full sm:w-1/4"
       >
         <option value="">Select Cow</option>
         {cows.map((c) => (
@@ -71,10 +91,10 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
 
       <input
         type="text"
-        placeholder="Feed Type"
+        placeholder="Feed Type (e.g. Grass, Grain)"
         value={feedType}
         onChange={(e) => setFeedType(e.target.value)}
-        className="border p-2 rounded focus:outline-blue-400"
+        className="border p-2 rounded w-full sm:w-1/4"
       />
 
       <input
@@ -82,23 +102,24 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
         placeholder="Quantity (kg)"
         value={quantity}
         onChange={(e) => setQuantity(e.target.value)}
-        className="border p-2 rounded focus:outline-blue-400"
+        className="border p-2 rounded w-full sm:w-1/4"
       />
 
       <input
         type="date"
         value={date}
         onChange={(e) => setDate(e.target.value)}
-        className="border p-2 rounded focus:outline-blue-400"
+        className="border p-2 rounded w-full sm:w-1/4"
       />
 
       <button
+        type="submit"
         disabled={loading}
-        className={`text-white p-2 rounded font-semibold ${
-          loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+        className={`bg-green-500 text-white px-4 py-2 rounded ${
+          loading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
         }`}
       >
-        {loading ? "Adding..." : "Add Feeding"}
+        {loading ? "Saving..." : "Add Feeding"}
       </button>
     </form>
   );
