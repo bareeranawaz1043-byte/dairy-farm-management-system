@@ -20,21 +20,13 @@ export default function MilkForm({ fetchMilk }: Props) {
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch cows (FIXED)
+  // ✅ Fetch cows
   const fetchCows = async () => {
     try {
       const res = await API.get("/cows");
 
-      console.log("COWS API RESPONSE:", res.data); // ✅ DEBUG
-
-      // ✅ Handle both cases (array OR object)
-      if (Array.isArray(res.data.data)) {
-        setCows(res.data.data);
-      } else if (Array.isArray(res.data.cows)) {
-        setCows(res.data.cows);
-      } else {
-        setCows([]); // fallback
-      }
+      const cowsData = res.data?.data || res.data || [];
+      setCows(Array.isArray(cowsData) ? cowsData : []);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load cows");
@@ -49,29 +41,44 @@ export default function MilkForm({ fetchMilk }: Props) {
     e.preventDefault();
 
     if (!cow || !quantity || Number(quantity) <= 0) {
-      toast.error("Enter valid data");
+      toast.error("Please enter valid data");
       return;
     }
 
     try {
       setLoading(true);
 
-      await API.post("/milk", {
-        cow,
-        quantity: Number(quantity),
-        date: date || new Date(),
-      });
+      const token = localStorage.getItem("token");
 
-      toast.success("Milk added successfully!");
+      await API.post(
+        "/milk",
+        {
+          cow,
+          quantity: Number(quantity),
+          date: date || new Date(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success("Milk record added!");
 
       setCow("");
       setQuantity("");
       setDate("");
 
       fetchMilk();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Failed to add milk");
+
+      if (error.response?.status === 401) {
+        toast.error("Unauthorized! Please login again");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to add milk");
+      }
     } finally {
       setLoading(false);
     }
@@ -79,8 +86,8 @@ export default function MilkForm({ fetchMilk }: Props) {
 
   return (
     <form
-      className="bg-white shadow-md p-6 rounded-lg flex flex-col sm:flex-row gap-3 justify-center items-center max-w-3xl mx-auto mb-6"
       onSubmit={handleSubmit}
+      className="bg-white shadow-lg p-6 rounded-xl flex flex-col sm:flex-row gap-3 items-center justify-center max-w-4xl mx-auto mb-6"
     >
       <select
         value={cow}
@@ -88,14 +95,11 @@ export default function MilkForm({ fetchMilk }: Props) {
         className="border p-2 rounded w-full sm:w-1/4"
       >
         <option value="">Select Cow</option>
-
-        {/* ✅ SAFE MAP FIX */}
-        {Array.isArray(cows) &&
-          cows.map((c) => (
-            <option key={c._id} value={c._id}>
-              {c.name}
-            </option>
-          ))}
+        {cows.map((c) => (
+          <option key={c._id} value={c._id}>
+            {c.name}
+          </option>
+        ))}
       </select>
 
       <input
@@ -116,11 +120,11 @@ export default function MilkForm({ fetchMilk }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className={`bg-blue-500 text-white px-4 py-2 rounded ${
+        className={`bg-blue-500 text-white px-4 py-2 rounded transition ${
           loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
         }`}
       >
-        {loading ? "Processing..." : "Add Milk"}
+        {loading ? "Saving..." : "Add Milk"}
       </button>
     </form>
   );
