@@ -12,45 +12,59 @@ type Props = {
 };
 
 export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [breed, setBreed] = useState("");
-  const [milkCapacity, setMilkCapacity] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    age: "",
+    breed: "",
+    milkCapacity: "",
+  });
+
   const [loading, setLoading] = useState(false);
 
+  // ✅ Fill form in edit mode
   useEffect(() => {
     if (editCow) {
-      setName(editCow.name);
-      setAge(String(editCow.age));
-      setBreed(editCow.breed);
-      setMilkCapacity(String(editCow.milkCapacity));
+      setForm({
+        name: editCow.name,
+        age: String(editCow.age),
+        breed: editCow.breed,
+        milkCapacity: String(editCow.milkCapacity),
+      });
     } else {
-      setName("");
-      setAge("");
-      setBreed("");
-      setMilkCapacity("");
+      setForm({
+        name: "",
+        age: "",
+        breed: "",
+        milkCapacity: "",
+      });
     }
   }, [editCow]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const { name, age, breed, milkCapacity } = form;
+
     if (
       !name.trim() ||
-      !age.trim() ||
+      !age ||
       !breed.trim() ||
-      !milkCapacity.trim() ||
+      !milkCapacity ||
       Number(age) <= 0 ||
       Number(milkCapacity) <= 0
     ) {
-      toast.error("Please fill all fields correctly");
+      toast.error("Please enter valid data in all fields");
       return;
     }
 
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("token"); // ✅ GET TOKEN
+      const token = localStorage.getItem("token");
 
       const payload = {
         name: name.trim(),
@@ -61,7 +75,7 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
 
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`, // ✅ SEND TOKEN
+          Authorization: `Bearer ${token}`,
         },
       };
 
@@ -70,20 +84,24 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
         toast.success("Cow updated successfully!");
         clearEdit && clearEdit();
       } else {
-        await API.post("/cows", payload, config); // ✅ FIXED
+        await API.post("/cows", payload, config);
         toast.success("Cow added successfully!");
       }
 
-      setName("");
-      setAge("");
-      setBreed("");
-      setMilkCapacity("");
+      // ✅ Reset form
+      setForm({
+        name: "",
+        age: "",
+        breed: "",
+        milkCapacity: "",
+      });
+
       fetchCows();
     } catch (error: any) {
       console.error("Error:", error);
 
       if (error.response?.status === 401) {
-        toast.error("Unauthorized! Please login again");
+        toast.error("Session expired. Please login again");
       } else if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
@@ -95,53 +113,95 @@ export default function CowForm({ fetchCows, editCow, clearEdit }: Props) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl mx-auto mb-6"
-    >
-      <div className="flex flex-wrap gap-4 items-center justify-center">
-        <input
-          type="text"
-          placeholder="Cow Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="border p-2 rounded flex-1 min-w-[150px]"
-        />
+    <div className="bg-white shadow-lg rounded-xl p-6 max-w-4xl mx-auto mb-6">
+      {/* Header */}
+      <h2 className="text-xl font-semibold mb-4 text-gray-700 text-center">
+        {editCow ? "✏️ Update Cow Details" : "➕ Add New Cow"}
+      </h2>
 
-        <input
-          type="number"
-          placeholder="Age"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-          className="border p-2 rounded flex-1 min-w-[100px]"
-        />
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        
+        {/* Name */}
+        <div>
+          <label className="text-sm text-gray-600">Cow Name</label>
+          <input
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Enter cow name"
+            className="border p-2 rounded w-full mt-1 focus:ring-2 focus:ring-blue-400 outline-none"
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="Breed"
-          value={breed}
-          onChange={(e) => setBreed(e.target.value)}
-          className="border p-2 rounded flex-1 min-w-[150px]"
-        />
+        {/* Age */}
+        <div>
+          <label className="text-sm text-gray-600">Age</label>
+          <input
+            type="number"
+            name="age"
+            value={form.age}
+            onChange={handleChange}
+            placeholder="Enter age"
+            className="border p-2 rounded w-full mt-1 focus:ring-2 focus:ring-blue-400 outline-none"
+          />
+        </div>
 
-        <input
-          type="number"
-          placeholder="Milk Capacity"
-          value={milkCapacity}
-          onChange={(e) => setMilkCapacity(e.target.value)}
-          className="border p-2 rounded flex-1 min-w-[120px]"
-        />
+        {/* Breed */}
+        <div>
+          <label className="text-sm text-gray-600">Breed</label>
+          <input
+            type="text"
+            name="breed"
+            value={form.breed}
+            onChange={handleChange}
+            placeholder="Enter breed"
+            className="border p-2 rounded w-full mt-1 focus:ring-2 focus:ring-blue-400 outline-none"
+          />
+        </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className={`px-4 py-2 rounded text-white ${
-            editCow ? "bg-yellow-500" : "bg-blue-500"
-          } ${loading ? "opacity-50" : ""}`}
-        >
-          {loading ? "Processing..." : editCow ? "Update" : "Add"}
-        </button>
-      </div>
-    </form>
+        {/* Milk Capacity */}
+        <div>
+          <label className="text-sm text-gray-600">Milk Capacity (liters)</label>
+          <input
+            type="number"
+            name="milkCapacity"
+            value={form.milkCapacity}
+            onChange={handleChange}
+            placeholder="e.g. 10"
+            className="border p-2 rounded w-full mt-1 focus:ring-2 focus:ring-blue-400 outline-none"
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="col-span-1 sm:col-span-2 flex justify-center gap-4 mt-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className={`px-6 py-2 rounded text-white font-medium transition ${
+              editCow
+                ? "bg-yellow-500 hover:bg-yellow-600"
+                : "bg-blue-500 hover:bg-blue-600"
+            } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            {loading
+              ? "Processing..."
+              : editCow
+              ? "Update Cow"
+              : "Add Cow"}
+          </button>
+
+          {editCow && (
+            <button
+              type="button"
+              onClick={clearEdit}
+              className="px-6 py-2 rounded bg-gray-400 hover:bg-gray-500 text-white"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }
