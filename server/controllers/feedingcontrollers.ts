@@ -1,36 +1,73 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import Feeding from "../models/feeding.ts";
 import Cow from "../models/cow.ts";
 
-export const createFeeding = async (req: Request, res: Response) => {
+interface IFeedingBody {
+  cow: string;
+  feedType: string;
+  quantity: number;
+  date?: Date;
+}
+
+// Create a new feeding entry
+export const createFeeding = async (req: Request<{}, {}, IFeedingBody>, res: Response, next: NextFunction) => {
   try {
     const { cow, feedType, quantity, date } = req.body;
 
     if (!cow || !feedType || quantity === undefined) {
-      return res.status(400).json({ message: "Cow, feed type, and quantity are required" });
+      return res.status(400).json({ success: false, message: "Cow, feed type, and quantity are required" });
     }
 
     if (quantity < 0) {
-      return res.status(400).json({ message: "Quantity cannot be negative" });
+      return res.status(400).json({ success: false, message: "Quantity cannot be negative" });
     }
 
     const cowExists = await Cow.findById(cow);
-    if (!cowExists) return res.status(404).json({ message: "Cow not found" });
+    if (!cowExists) return res.status(404).json({ success: false, message: "Cow not found" });
 
-    const feed = await Feeding.create({ cow, feedType, quantity, date });
-    res.status(201).json(feed);
+    const feed = await Feeding.create({ cow, feedType, quantity, date: date || new Date() });
+
+    res.status(201).json({ success: true, message: "Feeding entry created", data: feed });
   } catch (error) {
-    console.error("Error creating feeding entry:", error);
-    res.status(500).json({ message: "Failed to create feeding entry" });
+    next(error);
   }
 };
 
-export const getFeeding = async (req: Request, res: Response) => {
+// Get all feeding entries
+export const getFeeding = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const feeds = await Feeding.find().populate("cow", "name age");
-    res.status(200).json(feeds);
+    const feeds = await Feeding.find().populate("cow", "name age breed");
+    res.status(200).json({ success: true, count: feeds.length, data: feeds });
   } catch (error) {
-    console.error("Error fetching feeding entries:", error);
-    res.status(500).json({ message: "Failed to fetch feeding entries" });
+    next(error);
+  }
+};
+
+// Get total feed quantity
+export const getTotalFeed = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await Feeding.aggregate([
+      { $group: { _id: null, totalFeed: { $sum: "$quantity" } } },
+    ]);
+
+    res.status(200).json({ success: true, totalFeed: result[0]?.totalFeed || 0 });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get feed per cow
+export const getFeedPerCow = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await Feeding.aggregate([
+      { $group: { _id: "$cow", totalFeed: { $sum: "$quantity" } } },
+      { $lookup: { from: "cows", localField: "_id", foreignField: "_id", as: "cowInfo" } },
+      { $unwind: "$cowInfo" },
+      { $project: { cowName: "$cowInfo.name", totalFeed: 1 } },
+    ]);
+
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
   }
 };
