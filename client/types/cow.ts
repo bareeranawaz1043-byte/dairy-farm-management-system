@@ -4,6 +4,8 @@ export type Cow = {
   age: number;
   breed: string;
   milkCapacity: number;
-  health?: "healthy" | "sick";
+  health: "healthy" | "sick";
   vaccination?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };

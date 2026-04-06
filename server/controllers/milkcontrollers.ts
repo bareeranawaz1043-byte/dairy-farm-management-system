@@ -1,156 +1,97 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
 import Milk from "../models/milk.ts";
 import Cow from "../models/cow.ts";
 
-/**
- * Create a new milk entry
- * POST /api/milk
- */
-export const createMilk = async (req: Request, res: Response) => {
+interface IMilkBody {
+  cow: string;      
+  quantity: number;
+  date?: Date;
+}
+
+
+export const createMilk = async (req: Request<{}, {}, IMilkBody>, res: Response, next: NextFunction) => {
   try {
     const { cow, quantity, date } = req.body;
 
     if (!cow || quantity === undefined) {
-      return res.status(400).json({ message: "Cow and quantity are required" });
+      return res.status(400).json({ success: false, message: "Cow and quantity are required" });
     }
 
     if (quantity < 0) {
-      return res.status(400).json({ message: "Quantity cannot be negative" });
+      return res.status(400).json({ success: false, message: "Quantity cannot be negative" });
     }
 
-    const cowExists = await Cow.findById(cow);
-    if (!cowExists) {
-      return res.status(404).json({ message: "Cow not found" });
-    }
+    
+    const cowId = new mongoose.Types.ObjectId(cow);
 
-    const milk = await Milk.create({
-      cow,
+    const cowExists = await Cow.findById(cowId);
+    if (!cowExists) return res.status(404).json({ success: false, message: "Cow not found" });
+
+  
+    const milk = await new Milk({
+      cow: cowId,
       quantity,
-      date: date || new Date(),
-    });
+      date: date || new Date()
+    }).save();
 
-    return res.status(201).json(milk);
+    res.status(201).json({ success: true, message: "Milk entry created", data: milk });
   } catch (error) {
-    console.error("Error creating milk entry:", error);
-    return res.status(500).json({ message: "Failed to add milk" });
+    next(error);
   }
 };
 
-/**
- * Get all milk entries
- * GET /api/milk
- */
-export const getMilk = async (req: Request, res: Response) => {
+export const getMilk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const milkEntries = await Milk.find()
-      .populate("cow", "name age")
+      .populate("cow", "name age breed")
       .sort({ date: -1 });
 
-    return res.status(200).json(milkEntries);
+    res.status(200).json({ success: true, count: milkEntries.length, data: milkEntries });
   } catch (error) {
-    console.error("Error fetching milk entries:", error);
-    return res.status(500).json({ message: "Failed to fetch milk entries" });
+    next(error);
   }
 };
 
-
-
-
-/**
- * ✅ DAY 7 START
- */
-
-/**
- * Get total milk
- * GET /api/milk/total
- */
-export const getTotalMilk = async (req: Request, res: Response) => {
+export const getTotalMilk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await Milk.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalMilk: { $sum: "$quantity" },
-        },
-      },
+      { $group: { _id: null, totalMilk: { $sum: "$quantity" } } }
     ]);
 
-    res.status(200).json({
-      totalMilk: result[0]?.totalMilk || 0,
-    });
+    res.status(200).json({ success: true, totalMilk: result[0]?.totalMilk || 0 });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to calculate total milk" });
+    next(error);
   }
 };
 
-/**
- * Get today's milk
- * GET /api/milk/daily
- */
-export const getDailyMilk = async (req: Request, res: Response) => {
+export const getDailyMilk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const result = await Milk.aggregate([
-      {
-        $match: {
-          date: { $gte: today },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalMilk: { $sum: "$quantity" },
-        },
-      },
+      { $match: { date: { $gte: today } } },
+      { $group: { _id: null, dailyMilk: { $sum: "$quantity" } } }
     ]);
 
-    res.status(200).json({
-      dailyMilk: result[0]?.totalMilk || 0,
-    });
+    res.status(200).json({ success: true, dailyMilk: result[0]?.dailyMilk || 0 });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to calculate daily milk" });
+    next(error);
   }
 };
 
-/**
- * Get milk per cow
- * GET /api/milk/per-cow
- */
-export const getMilkPerCow = async (req: Request, res: Response) => {
+export const getMilkPerCow = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await Milk.aggregate([
-      {
-        $group: {
-          _id: "$cow",
-          totalMilk: { $sum: "$quantity" },
-        },
-      },
-      {
-        $lookup: {
-          from: "cows",
-          localField: "_id",
-          foreignField: "_id",
-          as: "cowInfo",
-        },
-      },
-      {
-        $unwind: "$cowInfo",
-      },
-      {
-        $project: {
-          cowName: "$cowInfo.name",
-          totalMilk: 1,
-        },
-      },
+      { $group: { _id: "$cow", totalMilk: { $sum: "$quantity" } } },
+      { $lookup: { from: "cows", localField: "_id", foreignField: "_id", as: "cowInfo" } },
+      { $unwind: "$cowInfo" },
+      { $project: { cowName: "$cowInfo.name", totalMilk: 1 } }
     ]);
 
-    res.status(200).json(result);
+    res.status(200).json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to calculate stats" });
+    next(error);
   }
 };
