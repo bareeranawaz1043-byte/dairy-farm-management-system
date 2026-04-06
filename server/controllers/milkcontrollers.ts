@@ -1,14 +1,15 @@
 import type { Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
 import Milk from "../models/milk.ts";
 import Cow from "../models/cow.ts";
 
 interface IMilkBody {
-  cow: string;
+  cow: string;      
   quantity: number;
   date?: Date;
 }
 
-// Create a new milk entry
+
 export const createMilk = async (req: Request<{}, {}, IMilkBody>, res: Response, next: NextFunction) => {
   try {
     const { cow, quantity, date } = req.body;
@@ -21,10 +22,18 @@ export const createMilk = async (req: Request<{}, {}, IMilkBody>, res: Response,
       return res.status(400).json({ success: false, message: "Quantity cannot be negative" });
     }
 
-    const cowExists = await Cow.findById(cow);
+    
+    const cowId = new mongoose.Types.ObjectId(cow);
+
+    const cowExists = await Cow.findById(cowId);
     if (!cowExists) return res.status(404).json({ success: false, message: "Cow not found" });
 
-    const milk = await Milk.create({ cow, quantity, date: date || new Date() });
+  
+    const milk = await new Milk({
+      cow: cowId,
+      quantity,
+      date: date || new Date()
+    }).save();
 
     res.status(201).json({ success: true, message: "Milk entry created", data: milk });
   } catch (error) {
@@ -32,7 +41,6 @@ export const createMilk = async (req: Request<{}, {}, IMilkBody>, res: Response,
   }
 };
 
-// Get all milk entries
 export const getMilk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const milkEntries = await Milk.find()
@@ -45,17 +53,18 @@ export const getMilk = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-// Get total milk quantity
 export const getTotalMilk = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await Milk.aggregate([{ $group: { _id: null, totalMilk: { $sum: "$quantity" } } }]);
+    const result = await Milk.aggregate([
+      { $group: { _id: null, totalMilk: { $sum: "$quantity" } } }
+    ]);
+
     res.status(200).json({ success: true, totalMilk: result[0]?.totalMilk || 0 });
   } catch (error) {
     next(error);
   }
 };
 
-// Get today's milk quantity
 export const getDailyMilk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const today = new Date();
@@ -63,7 +72,7 @@ export const getDailyMilk = async (req: Request, res: Response, next: NextFuncti
 
     const result = await Milk.aggregate([
       { $match: { date: { $gte: today } } },
-      { $group: { _id: null, dailyMilk: { $sum: "$quantity" } } },
+      { $group: { _id: null, dailyMilk: { $sum: "$quantity" } } }
     ]);
 
     res.status(200).json({ success: true, dailyMilk: result[0]?.dailyMilk || 0 });
@@ -72,14 +81,13 @@ export const getDailyMilk = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-// Get milk quantity per cow
 export const getMilkPerCow = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await Milk.aggregate([
       { $group: { _id: "$cow", totalMilk: { $sum: "$quantity" } } },
       { $lookup: { from: "cows", localField: "_id", foreignField: "_id", as: "cowInfo" } },
       { $unwind: "$cowInfo" },
-      { $project: { cowName: "$cowInfo.name", totalMilk: 1 } },
+      { $project: { cowName: "$cowInfo.name", totalMilk: 1 } }
     ]);
 
     res.status(200).json({ success: true, data: result });
