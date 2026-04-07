@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, model } from "mongoose";
 
 interface IFeeding extends Document {
-  cow: mongoose.Schema.Types.ObjectId;
+  cow: mongoose.Types.ObjectId;
   feedType: string;
   quantity: number;
   date: Date;
@@ -31,7 +31,7 @@ const FeedingSchema = new Schema<IFeeding>(
       default: Date.now,
     },
   },
-  { timestamps: true } 
+  { timestamps: true }
 );
 
 export default model<IFeeding>("Feeding", FeedingSchema);

@@ -1,7 +1,7 @@
 import mongoose, { Schema, model, Document } from "mongoose";
 
 interface IMilk extends Document {
-  cow: mongoose.Schema.Types.ObjectId;
+  cow: mongoose.Types.ObjectId;
   quantity: number;
   date: Date;
   createdAt?: Date;
@@ -25,7 +25,7 @@ const MilkSchema = new Schema<IMilk>(
       default: Date.now,
     },
   },
-  { timestamps: true } 
+  { timestamps: true }
 );
 
 export default model<IMilk>("Milk", MilkSchema);
