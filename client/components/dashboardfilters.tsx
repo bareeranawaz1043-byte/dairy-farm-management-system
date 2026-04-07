@@ -1,32 +1,33 @@
 "use client";
+
 import { useState } from "react";
 
 type Props = {
-  onFilter: (month: string, year: string) => void; // ensure type matches
+  onFilter: (month: string, year: string) => void;
 };
 
 export default function DashboardFilters({ onFilter }: Props) {
-  const [month, setMonth] = useState("");
-  const [year, setYear] = useState("");
+  const [value, setValue] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!value) return;
+
+    const [year, month] = value.split("-");
     onFilter(month, year);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex gap-2 justify-center">
       <input
         type="month"
-        value={month && year ? `${year}-${month}` : ""}
-        onChange={(e) => {
-          const [y, m] = e.target.value.split("-");
-          setYear(y);
-          setMonth(m);
-        }}
-        className="border p-1 rounded"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="border p-2 rounded"
       />
-      <button type="submit" className="bg-blue-500 text-white p-1 rounded">
+
+      <button className="bg-blue-500 text-white px-4 rounded">
         Filter
       </button>
     </form>
