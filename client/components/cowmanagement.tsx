@@ -7,7 +7,7 @@ import CowForm from "./cowform";
 import CowList from "./cowlists";
 
 type Cow = {
-  _id: string;
+  _id: string; // backend returns ObjectId as string
   name: string;
   age: number;
   breed: string;
@@ -25,13 +25,9 @@ export default function CowManagement() {
   const fetchCows = async () => {
     try {
       setLoading(true);
-
-      const res = await API.get("/cows");
-
-      // 🔥 IMPORTANT (backend structure)
+      const res = await API.get<{ success: boolean; count: number; data: Cow[] }>("/cows");
       setCows(res.data.data);
-
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast.error("Failed to fetch cows");
     } finally {
@@ -47,16 +43,11 @@ export default function CowManagement() {
   const deleteCow = async (id: string) => {
     try {
       const token = localStorage.getItem("token");
-
       await API.delete(`/cows/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       toast.success("Cow deleted successfully!");
-      fetchCows();
-
+      setCows(prev => prev.filter(cow => cow._id !== id)); // update locally
     } catch (error: any) {
       console.error(error);
       toast.error(error.response?.data?.message || "Delete failed");
@@ -64,42 +55,21 @@ export default function CowManagement() {
   };
 
   // ✅ EDIT
-  const editCowHandler = (cow: Cow) => {
-    setEditingCow(cow);
-  };
-
-  const clearEdit = () => {
-    setEditingCow(null);
-  };
+  const editCowHandler = (cow: Cow) => setEditingCow(cow);
+  const clearEdit = () => setEditingCow(null);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      
       <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6 text-center">🐄 Cow Management</h1>
 
-        {/* HEADER */}
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          🐄 Cow Management
-        </h1>
+        <CowForm fetchCows={fetchCows} editCow={editingCow} clearEdit={clearEdit} />
 
-        {/* FORM */}
-        <CowForm
-          fetchCows={fetchCows}
-          editCow={editingCow}
-          clearEdit={clearEdit}
-        />
-
-        {/* LOADING */}
         {loading ? (
           <p className="text-center text-gray-500">Loading cows...</p>
         ) : (
-          <CowList
-            cows={cows}
-            deleteCow={deleteCow}
-            editCow={editCowHandler}
-          />
+          <CowList cows={cows} deleteCow={deleteCow} editCow={editCowHandler} />
         )}
-
       </div>
     </div>
   );
