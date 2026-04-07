@@ -14,12 +14,16 @@ export default function DashboardPage() {
     if (!token) {
       router.push("/login");
     } else {
-      setAuthorized(true); 
+      setAuthorized(true);
     }
-  }, []);
+  }, [router]);
 
   if (!authorized) {
-    return <p className="text-center mt-10">Checking authentication...</p>;
+    return (
+      <p className="text-center mt-10 text-gray-500">
+        Checking authentication...
+      </p>
+    );
   }
 
   return <Dashboard />;
