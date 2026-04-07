@@ -6,18 +6,24 @@ import { FaCrow, FaMoneyBill, FaExclamationTriangle } from "react-icons/fa";
 import { GiMilkCarton } from "react-icons/gi";
 import DashboardFilters from "./dashboardfilters";
 
-// ✅ Added proper TypeScript type (Branch 5)
+type DashboardData = {
+  cows: number;
+  milk: number;
+  sales: number;
+  alerts: number;
+};
+
 type MilkEntry = {
   _id: string;
   quantity: number;
   date: string;
-  cow: {
+  cow?: {
     name: string;
   };
 };
 
 export default function Dashboard() {
-  const [data, setData] = useState({
+  const [data, setData] = useState<DashboardData>({
     cows: 0,
     milk: 0,
     sales: 0,
@@ -25,13 +31,13 @@ export default function Dashboard() {
   });
 
   const [totalQuantity, setTotalQuantity] = useState(0);
-
   const [milkEntries, setMilkEntries] = useState<MilkEntry[]>([]);
-
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = async () => {
     try {
+      setLoading(true);
+
       const [cowsRes, milkRes, salesRes, alertsRes] = await Promise.all([
         fetch("/api/dashboard/total-cows"),
         fetch("/api/dashboard/total-milk"),
@@ -65,18 +71,19 @@ export default function Dashboard() {
         return;
       }
 
-      const res = await fetch(`/api/dashboard/monthly?month=${month}&year=${year}`);
+      const res = await fetch(
+        `/api/dashboard/monthly?month=${month}&year=${year}`
+      );
+
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Error fetching data");
-      }
+      if (!res.ok) throw new Error(data.message);
 
-      setTotalQuantity(data.totalQuantity);
-      setMilkEntries(data.entries);
+      setTotalQuantity(data.totalQuantity || 0);
+      setMilkEntries(data.entries || []);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Something went wrong");
+      toast.error(err.message || "Error fetching data");
     }
   };
 
@@ -87,7 +94,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
-        <p className="text-gray-500 text-lg animate-pulse">
+        <p className="text-gray-500 animate-pulse">
           Loading Dashboard...
         </p>
       </div>
@@ -100,63 +107,60 @@ export default function Dashboard() {
       <DashboardFilters onFilter={handleFilter} />
 
       {totalQuantity > 0 && (
-        <p className="text-center font-bold mt-2 text-lg">
-          Total Milk for selected month: {totalQuantity} L
+        <p className="text-center font-bold text-lg">
+          Total Milk: {totalQuantity} L
         </p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-md flex items-center justify-between hover:scale-105 transition duration-300">
-          <div>
-            <h2 className="text-lg">Total Cows</h2>
-            <p className="text-2xl font-bold">{data.cows}</p>
-          </div>
-          <FaCrow size={30} />
-        </div>
+        <Card title="Total Cows" value={data.cows} icon={<FaCrow />} color="bg-blue-500" />
 
-        <div className="bg-green-500 text-white p-6 rounded-2xl shadow-md flex items-center justify-between hover:scale-105 transition duration-300">
-          <div>
-            <h2 className="text-lg">Total Milk</h2>
-            <p className="text-2xl font-bold">{data.milk} L</p>
-          </div>
-          <GiMilkCarton size={30} />
-        </div>
+        <Card title="Total Milk" value={`${data.milk} L`} icon={<GiMilkCarton />} color="bg-green-500" />
 
-        <div className="bg-purple-500 text-white p-6 rounded-2xl shadow-md flex items-center justify-between hover:scale-105 transition duration-300">
-          <div>
-            <h2 className="text-lg">Total Sales</h2>
-            <p className="text-2xl font-bold">Rs {data.sales}</p>
-          </div>
-          <FaMoneyBill size={30} />
-        </div>
+        <Card title="Total Sales" value={`Rs ${data.sales}`} icon={<FaMoneyBill />} color="bg-purple-500" />
 
-        <div className="bg-red-500 text-white p-6 rounded-2xl shadow-md flex items-center justify-between hover:scale-105 transition duration-300">
-          <div>
-            <h2 className="text-lg">Alerts</h2>
-            <p className="text-2xl font-bold">{data.alerts}</p>
-          </div>
-          <FaExclamationTriangle size={30} />
-        </div>
+        <Card title="Alerts" value={data.alerts} icon={<FaExclamationTriangle />} color="bg-red-500" />
+
       </div>
 
+      
       {milkEntries.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {milkEntries.map((entry) => (
-            <div key={entry._id} className="p-4 border rounded-2xl shadow-sm bg-white hover:shadow-md transition">
-              <h3 className="font-semibold">{entry.cow.name}</h3>
+            <div key={entry._id} className="p-4 border rounded-xl bg-white shadow-sm">
+              <h3 className="font-semibold">
+                {entry.cow?.name || "Unknown Cow"}
+              </h3>
               <p>Quantity: {entry.quantity} L</p>
-              <p>Date: {new Date(entry.date).toLocaleDateString()}</p>
+              <p>{new Date(entry.date).toLocaleDateString()}</p>
             </div>
           ))}
         </div>
       )}
+    </div>
+  );
+}
 
-      {milkEntries.length === 0 && totalQuantity > 0 && (
-        <p className="text-center text-gray-500 mt-4">
-          No milk records found for selected month
-        </p>
-      )}
+function Card({
+  title,
+  value,
+  icon,
+  color,
+}: {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  color: string;
+}) {
+  return (
+    <div className={`${color} text-white p-6 rounded-xl flex justify-between items-center`}>
+      <div>
+        <h2>{title}</h2>
+        <p className="text-xl font-bold">{value}</p>
+      </div>
+      <div className="text-2xl">{icon}</div>
     </div>
   );
 }
