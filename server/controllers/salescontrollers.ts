@@ -1,13 +1,24 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
 import Sale from "../models/sales.ts";
 import Cow from "../models/cow.ts";
 
-// CREATE SALE
-export const createSale = async (req: Request, res: Response) => {
+interface ISaleBody {
+  cow: string;
+  quantity: number;
+  price: number;
+  date?: string;
+}
+
+
+export const createSale = async (
+  req: Request<{}, {}, ISaleBody>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { cow, quantity, price, date } = req.body;
 
-    // Runtime validation
     if (!cow || quantity === undefined || price === undefined) {
       return res.status(400).json({
         success: false,
@@ -22,8 +33,8 @@ export const createSale = async (req: Request, res: Response) => {
       });
     }
 
-    // Check if cow exists
-    const cowExists = await Cow.findById(cow);
+    const cowId = new mongoose.Types.ObjectId(cow);
+    const cowExists = await Cow.findById(cowId);
     if (!cowExists) {
       return res.status(404).json({
         success: false,
@@ -31,30 +42,43 @@ export const createSale = async (req: Request, res: Response) => {
       });
     }
 
-    // Create Sale
-    const sale = await Sale.create({ cow, quantity, price, date });
+    const total = quantity * price;
 
-    return res.status(201).json({ success: true, data: sale });
-  } catch (error) {
-    console.error("Error creating sale:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create sale",
+    const sale = await Sale.create({
+      cow: cowId,
+      quantity,
+      price,
+      total,
+      date: date ? new Date(date) : new Date(),
     });
+
+    return res.status(201).json({
+      success: true,
+      message: "Sale created successfully",
+      data: sale,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
 // GET ALL SALES
-export const getSales = async (req: Request, res: Response) => {
+export const getSales = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const sales = await Sale.find().populate("cow", "name age");
+    const sales = await Sale.find()
+      .populate("cow", "name age")
+      .sort({ date: -1 });
 
-    return res.status(200).json({ success: true, data: sales });
-  } catch (error) {
-    console.error("Error fetching sales:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch sales",
+    return res.status(200).json({
+      success: true,
+      count: sales.length,
+      data: sales,
     });
+  } catch (error) {
+    next(error);
   }
 };
