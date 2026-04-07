@@ -12,7 +12,7 @@ type Sale = {
   price: number;
   total: number;
   date: string;
-  cow: {
+  cow?: {
     name: string;
   };
 };
@@ -22,10 +22,12 @@ export default function SalesManagement() {
   const [loading, setLoading] = useState(false);
 
   const fetchSales = async () => {
-    setLoading(true);
     try {
-      const res = await API.get("/sales");
-      setSales(res.data);
+      setLoading(true);
+
+      const res = await API.get<{ success: boolean; data: Sale[] }>("/sales");
+
+      setSales(res.data.data); // ✅ IMPORTANT FIX
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch sales");
@@ -41,7 +43,9 @@ export default function SalesManagement() {
   return (
     <div className="p-6">
       <Toaster position="top-right" />
+
       <SalesForm fetchSales={fetchSales} />
+
       {loading ? (
         <p className="text-center text-gray-500 mt-4">Loading sales...</p>
       ) : (

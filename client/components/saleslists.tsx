@@ -6,7 +6,7 @@ type Sale = {
   price: number;
   total: number;
   date: string;
-  cow: {
+  cow?: {
     name: string;
   };
 };
@@ -24,15 +24,22 @@ export default function SalesList({ sales }: Props) {
         sales.map((sale) => (
           <div
             key={sale._id}
-            className="flex justify-between items-center bg-gray-100 p-4 mb-2 rounded hover:bg-gray-200 transition"
+            className="flex justify-between items-center bg-gray-100 p-4 mb-2 rounded"
           >
             <div>
-              <p className="text-gray-700 font-medium">{sale.cow.name}</p>
-              <p className="text-gray-600 text-sm">
-                Quantity: {sale.quantity} | Price: ${sale.price} | Total: ${sale.total}
+              <p className="font-medium">
+                {sale.cow?.name || "Unknown Cow"} {/* ✅ FIX */}
+              </p>
+
+              <p className="text-sm text-gray-600">
+                Quantity: {sale.quantity} | Price: {sale.price} | Total:{" "}
+                {sale.total}
               </p>
             </div>
-            <div className="text-gray-500 text-sm">{new Date(sale.date).toLocaleDateString()}</div>
+
+            <div className="text-sm text-gray-500">
+              {new Date(sale.date).toLocaleDateString()}
+            </div>
           </div>
         ))
       )}

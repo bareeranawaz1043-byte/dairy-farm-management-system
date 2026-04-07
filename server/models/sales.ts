@@ -1,7 +1,7 @@
 import mongoose, { Schema, model, Document } from "mongoose";
 
 export interface ISale extends Document {
-  cow: mongoose.Schema.Types.ObjectId;
+  cow: mongoose.Types.ObjectId;
   quantity: number;
   price: number;
   total: number;
