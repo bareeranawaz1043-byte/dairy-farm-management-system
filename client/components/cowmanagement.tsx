@@ -7,7 +7,7 @@ import CowForm from "./cowform";
 import CowList from "./cowlists";
 
 type Cow = {
-  _id: string; // backend returns ObjectId as string
+  _id: string; 
   name: string;
   age: number;
   breed: string;
@@ -20,8 +20,6 @@ export default function CowManagement() {
   const [cows, setCows] = useState<Cow[]>([]);
   const [editingCow, setEditingCow] = useState<Cow | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // ✅ FETCH COWS
   const fetchCows = async () => {
     try {
       setLoading(true);
@@ -39,7 +37,6 @@ export default function CowManagement() {
     fetchCows();
   }, []);
 
-  // ✅ DELETE
   const deleteCow = async (id: string) => {
     try {
       const token = localStorage.getItem("token");
@@ -53,8 +50,6 @@ export default function CowManagement() {
       toast.error(error.response?.data?.message || "Delete failed");
     }
   };
-
-  // ✅ EDIT
   const editCowHandler = (cow: Cow) => setEditingCow(cow);
   const clearEdit = () => setEditingCow(null);
 
