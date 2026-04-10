@@ -4,12 +4,12 @@ import { useState } from "react";
 import { Cow } from "../types/cow";
 
 type Props = {
-  cows?: Cow[];
+  cows: Cow[]; // ✅ FIXED (not optional)
   deleteCow: (id: string) => void;
   editCow?: (cow: Cow) => void;
 };
 
-export default function CowList({ cows = [], deleteCow, editCow }: Props) {
+export default function CowList({ cows, deleteCow, editCow }: Props) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,8 +17,11 @@ export default function CowList({ cows = [], deleteCow, editCow }: Props) {
 
   const itemsPerPage = 5;
 
+  // ✅ Safety (important)
+  const safeCows = Array.isArray(cows) ? cows : [];
+
   // 🔍 Search + Filter
-  const filteredCows = cows.filter((cow) => {
+  const filteredCows = safeCows.filter((cow) => {
     const matchSearch = cow.name
       .toLowerCase()
       .includes(search.toLowerCase());
@@ -39,12 +42,13 @@ export default function CowList({ cows = [], deleteCow, editCow }: Props) {
     currentPage * itemsPerPage
   );
 
-  if (!cows.length) {
+  if (!safeCows.length) {
     return <p className="text-center text-gray-500 mt-6">No cows found 🐄</p>;
   }
 
   return (
     <div className="mt-6 max-w-6xl mx-auto">
+      
       {/* 🔍 Search + Filter */}
       <div className="flex flex-col sm:flex-row justify-between gap-3 mb-4">
         <input
@@ -129,7 +133,7 @@ export default function CowList({ cows = [], deleteCow, editCow }: Props) {
         </table>
       </div>
 
-      {/* 📄 Pagination */}
+      {/* Pagination */}
       <div className="flex justify-center gap-2 mt-4">
         {Array.from({ length: totalPages }, (_, i) => (
           <button
@@ -146,7 +150,7 @@ export default function CowList({ cows = [], deleteCow, editCow }: Props) {
         ))}
       </div>
 
-      {/* 🧠 Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {selectedCow && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
           <div className="bg-white p-6 rounded shadow-md text-center">
