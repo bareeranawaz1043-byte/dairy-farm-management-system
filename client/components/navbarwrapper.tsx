@@ -6,8 +6,8 @@ import Navbar from "./navbar";
 export default function NavbarWrapper() {
   const pathname = usePathname();
 
-  // ✅ login page pe navbar hide
-  if (pathname === "/login") return null;
+  // hide on auth pages
+  if (pathname === "/login" || pathname === "/signup") return null;
 
   return <Navbar />;
 }
