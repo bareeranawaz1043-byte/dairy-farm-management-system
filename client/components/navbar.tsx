@@ -1,60 +1,94 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+
+type User = {
+  name?: string;
+  role?: string;
+};
 
 export default function Navbar() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  // ✅ Logout function (Branch 4)
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/login";
+    router.push("/login");
   };
 
+  const linkClass = (path: string) =>
+    `px-3 py-2 rounded-md text-sm font-medium ${
+      pathname === path
+        ? "bg-blue-600 text-white"
+        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+    }`;
+
   return (
-    <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
-      
-      <h1 className="text-lg font-bold">Dairy Farm</h1>
+    <nav className="bg-gray-900 shadow-md">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
-      <div className="flex gap-4 items-center">
-        <a href="/dashboard" className="hover:text-gray-300">Dashboard</a>
+        {/* LOGO */}
+        <h1 className="text-xl font-bold text-white tracking-wide">
+          🐄 Dairy Farm
+        </h1>
 
-        {/* ✅ Admin Only */}
-        {user?.role === "admin" && (
-          <>
-            <a href="/cows" className="hover:text-gray-300">Cows</a>
-            <a href="/sales" className="hover:text-gray-300">Sales</a>
-            <a href="/workers" className="hover:text-gray-300">Workers</a>
-          </>
-        )}
+        {/* LINKS */}
+        <div className="flex items-center gap-3">
 
-        {/* ✅ Available for all */}
-        <a href="/milk" className="hover:text-gray-300">Milk</a>
+          <Link href="/dashboard" className={linkClass("/dashboard")}>
+            Dashboard
+          </Link>
 
-        {/* ✅ Show user role */}
-        {user && (
-          <span className="text-sm bg-gray-700 px-2 py-1 rounded">
-            {user.role}
-          </span>
-        )}
+          {user?.role === "admin" && (
+            <>
+              <Link href="/cows" className={linkClass("/cows")}>
+                Cows
+              </Link>
 
-        {/* ✅ Logout Button */}
-        {user && (
-          <button
-            onClick={logout}
-            className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm"
-          >
-            Logout
-          </button>
-        )}
+              <Link href="/feeding" className={linkClass("/feeding")}>
+                Feeding
+              </Link>
+
+              <Link href="/sales" className={linkClass("/sales")}>
+                Sales
+              </Link>
+
+              <Link href="/workers" className={linkClass("/workers")}>
+                Workers
+              </Link>
+            </>
+          )}
+
+          <Link href="/milk" className={linkClass("/milk")}>
+            Milk
+          </Link>
+
+          {/* USER INFO */}
+          {user && (
+            <span className="text-xs bg-gray-700 px-2 py-1 rounded text-gray-200">
+              {user.role}
+            </span>
+          )}
+
+          {/* LOGOUT */}
+          {user && (
+            <button
+              onClick={logout}
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+            >
+              Logout
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );
