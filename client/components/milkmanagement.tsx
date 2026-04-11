@@ -32,11 +32,10 @@ export default function MilkManagement() {
       setLoading(true);
       const res = await API.get("/milk");
 
-      const milkData = res.data?.data || res.data || [];
-      setMilk(Array.isArray(milkData) ? milkData : []);
+      const data = res.data?.data || res.data || [];
+      setMilk(Array.isArray(data) ? data : []);
 
     } catch (error) {
-      console.error(error);
       toast.error("Failed to fetch milk");
     } finally {
       setLoading(false);
@@ -53,9 +52,12 @@ export default function MilkManagement() {
 
       setTotalMilk(totalRes.data?.totalMilk || 0);
       setDailyMilk(dailyRes.data?.dailyMilk || 0);
-      setMilkPerCow(perCowRes.data || []);
+
+      const perCow = perCowRes.data?.data || perCowRes.data;
+
+      setMilkPerCow(Array.isArray(perCow) ? perCow : []);
+
     } catch (error) {
-      console.error(error);
       toast.error("Failed to fetch stats");
     }
   };
@@ -67,44 +69,43 @@ export default function MilkManagement() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Toaster position="top-right" />
+      <Toaster />
 
       <h1 className="text-3xl font-bold text-center mb-6">
-        🥛 Milk Management Dashboard
+        🥛 Milk Dashboard
       </h1>
 
       <MilkForm fetchMilk={fetchMilk} />
 
       {loading ? (
-        <p className="text-center text-gray-500">Loading milk data...</p>
+        <p className="text-center">Loading...</p>
       ) : (
         <MilkList milk={milk} />
       )}
 
-      {/* 📊 STATS */}
-      <div className="mt-8 max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        
-        <div className="bg-blue-500 text-white p-5 rounded-xl shadow">
-          <h3 className="text-lg">Total Milk</h3>
-          <p className="text-3xl font-bold">{totalMilk} L</p>
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <div className="bg-blue-500 text-white p-5 rounded">
+          <h3>Total Milk</h3>
+          <p className="text-2xl">{totalMilk} L</p>
         </div>
 
-        <div className="bg-green-500 text-white p-5 rounded-xl shadow">
-          <h3 className="text-lg">Today's Milk</h3>
-          <p className="text-3xl font-bold">{dailyMilk} L</p>
+        <div className="bg-green-500 text-white p-5 rounded">
+          <h3>Today</h3>
+          <p className="text-2xl">{dailyMilk} L</p>
         </div>
 
-        <div className="bg-yellow-500 text-white p-5 rounded-xl shadow col-span-1 sm:col-span-2 lg:col-span-3">
-          <h3 className="text-lg mb-2">Milk Per Cow</h3>
+        <div className="bg-yellow-500 text-white p-5 rounded col-span-3">
+          <h3>Milk Per Cow</h3>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mt-2">
             {milkPerCow.length === 0 ? (
-              <p>No data available</p>
+              <p>No data</p>
             ) : (
               milkPerCow.map((cow) => (
                 <span
                   key={cow.cowName}
-                  className="bg-white text-gray-800 px-3 py-1 rounded shadow text-sm"
+                  className="bg-white text-black px-2 py-1 rounded"
                 >
                   {cow.cowName}: {cow.totalMilk} L
                 </span>
@@ -112,6 +113,7 @@ export default function MilkManagement() {
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
