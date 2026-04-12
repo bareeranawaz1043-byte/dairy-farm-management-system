@@ -19,9 +19,14 @@ export default function MilkList({ milk }: Props) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto mt-6 bg-white shadow-lg rounded-xl overflow-hidden">
+    <div className="max-w-6xl mx-auto mt-6 bg-white shadow-xl rounded-2xl overflow-hidden">
+      
+      <div className="px-4 py-3 border-b font-semibold text-gray-700">
+        Milk Records
+      </div>
+
       <table className="w-full text-sm">
-        <thead className="bg-gray-100">
+        <thead className="bg-gray-100 text-gray-600">
           <tr>
             <th className="p-3 text-left">Cow</th>
             <th className="p-3 text-center">Quantity</th>
@@ -31,16 +36,20 @@ export default function MilkList({ milk }: Props) {
 
         <tbody>
           {milk.map((item) => (
-            <tr key={item._id} className="border-b hover:bg-gray-50">
-              <td className="p-3 font-medium">🐄 {item.cow?.name}</td>
+            <tr key={item._id} className="border-b hover:bg-gray-50 transition">
+              
+              <td className="p-3 font-medium flex items-center gap-2">
+                🐄 {item.cow?.name}
+              </td>
 
-              <td className="p-3 text-center">
+              <td className="p-3 text-center font-semibold text-blue-600">
                 {item.quantity} L
               </td>
 
-              <td className="p-3 text-center text-gray-600">
+              <td className="p-3 text-center text-gray-500">
                 {new Date(item.date).toLocaleDateString()}
               </td>
+
             </tr>
           ))}
         </tbody>
