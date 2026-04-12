@@ -10,9 +10,7 @@ type Milk = {
   _id: string;
   quantity: number;
   date: string;
-  cow: {
-    name: string;
-  };
+  cow: { name: string };
 };
 
 type MilkPerCow = {
@@ -31,11 +29,9 @@ export default function MilkManagement() {
     try {
       setLoading(true);
       const res = await API.get("/milk");
-
       const data = res.data?.data || res.data || [];
       setMilk(Array.isArray(data) ? data : []);
-
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch milk");
     } finally {
       setLoading(false);
@@ -54,10 +50,8 @@ export default function MilkManagement() {
       setDailyMilk(dailyRes.data?.dailyMilk || 0);
 
       const perCow = perCowRes.data?.data || perCowRes.data;
-
       setMilkPerCow(Array.isArray(perCow) ? perCow : []);
-
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch stats");
     }
   };
@@ -71,43 +65,44 @@ export default function MilkManagement() {
     <div className="p-6 bg-gray-50 min-h-screen">
       <Toaster />
 
-      <h1 className="text-3xl font-bold text-center mb-6">
+      <h1 className="text-3xl font-bold text-center mb-6 text-gray-700">
         🥛 Milk Dashboard
       </h1>
 
       <MilkForm fetchMilk={fetchMilk} />
 
       {loading ? (
-        <p className="text-center">Loading...</p>
+        <p className="text-center text-gray-500">Loading...</p>
       ) : (
         <MilkList milk={milk} />
       )}
 
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* STATS */}
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
 
-        <div className="bg-blue-500 text-white p-5 rounded">
+        <div className="bg-linear-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
           <h3>Total Milk</h3>
-          <p className="text-2xl">{totalMilk} L</p>
+          <p className="text-3xl font-bold mt-2">{totalMilk} L</p>
         </div>
 
-        <div className="bg-green-500 text-white p-5 rounded">
-          <h3>Today</h3>
-          <p className="text-2xl">{dailyMilk} L</p>
+        <div className="bg-linear-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
+          <h3>Today's Milk</h3>
+          <p className="text-3xl font-bold mt-2">{dailyMilk} L</p>
         </div>
 
-        <div className="bg-yellow-500 text-white p-5 rounded col-span-3">
-          <h3>Milk Per Cow</h3>
+        <div className="bg-linear-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-xl shadow-lg col-span-1 sm:col-span-2 lg:col-span-3">
+          <h3 className="mb-3">Milk Per Cow</h3>
 
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap gap-3">
             {milkPerCow.length === 0 ? (
               <p>No data</p>
             ) : (
               milkPerCow.map((cow) => (
                 <span
                   key={cow.cowName}
-                  className="bg-white text-black px-2 py-1 rounded"
+                  className="bg-white text-gray-800 px-4 py-2 rounded-full text-sm font-medium shadow"
                 >
-                  {cow.cowName}: {cow.totalMilk} L
+                  🐄 {cow.cowName}: {cow.totalMilk} L
                 </span>
               ))
             )}
