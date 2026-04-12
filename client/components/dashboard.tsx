@@ -35,27 +35,35 @@ export default function Dashboard() {
   const [milkEntries, setMilkEntries] = useState<MilkEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const safeGet = async (url: string, fallback = {}) => {
+    try {
+      const res = await API.get(url);
+      return res.data;
+    } catch (err) {
+      console.warn(`API failed: ${url}`);
+      return fallback; // 👈 prevent crash
+    }
+  };
+
   const fetchDashboard = async () => {
     try {
       setLoading(true);
 
-      const [cowsRes, milkRes, salesRes, alertsRes] = await Promise.all([
-        API.get("/dashboard/total-cows"),
-        API.get("/dashboard/total-milk"),
-        API.get("/dashboard/total-sales"),
-        API.get("/dashboard/alerts"),
-      ]);
+      const cows = await safeGet("/dashboard/total-cows");
+      const milk = await safeGet("/dashboard/total-milk");
+      const sales = await safeGet("/dashboard/total-sales");
+      const alerts = await safeGet("/dashboard/alerts");
 
       setData({
-        cows: cowsRes.data?.totalCows || 0,
-        milk: milkRes.data?.totalMilk || 0,
-        sales: salesRes.data?.totalSales || 0,
-        alerts: alertsRes.data?.alerts?.length || 0,
+        cows: cows?.totalCows || 0,
+        milk: milk?.totalMilk || 0,
+        sales: sales?.totalSales || 0,
+        alerts: alerts?.alerts?.length || 0,
       });
 
     } catch (error) {
       console.error(error);
-      toast.error("Failed to load dashboard");
+      toast.error("Dashboard load failed");
     } finally {
       setLoading(false);
     }
@@ -68,16 +76,16 @@ export default function Dashboard() {
         return;
       }
 
-      const res = await API.get(
+      const res = await safeGet(
         `/dashboard/monthly?month=${month}&year=${year}`
       );
 
-      setTotalQuantity(res.data?.totalQuantity || 0);
-      setMilkEntries(res.data?.entries || []);
+      setTotalQuantity(res?.totalQuantity || 0);
+      setMilkEntries(Array.isArray(res?.entries) ? res.entries : []);
 
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Error fetching data");
+      toast.error("Filter failed");
     }
   };
 
@@ -87,7 +95,9 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <p className="text-center mt-10 text-gray-500">Loading Dashboard...</p>
+      <p className="text-center mt-10 text-gray-500">
+        Loading Dashboard...
+      </p>
     );
   }
 
@@ -115,7 +125,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {milkEntries.map((entry) => (
             <div key={entry._id} className="p-4 border rounded-xl bg-white shadow-sm">
-              <h3>{entry.cow?.name || "Unknown"}</h3>
+              <h3>{entry.cow?.name || "Unknown Cow"}</h3>
               <p>{entry.quantity} L</p>
               <p>{new Date(entry.date).toLocaleDateString()}</p>
             </div>
