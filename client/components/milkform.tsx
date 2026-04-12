@@ -20,15 +20,12 @@ export default function MilkForm({ fetchMilk }: Props) {
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch cows
   const fetchCows = async () => {
     try {
       const res = await API.get("/cows");
-
       const cowsData = res.data?.data || res.data || [];
       setCows(Array.isArray(cowsData) ? cowsData : []);
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("Failed to load cows");
     }
   };
@@ -58,9 +55,7 @@ export default function MilkForm({ fetchMilk }: Props) {
           date: date || new Date(),
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -72,60 +67,56 @@ export default function MilkForm({ fetchMilk }: Props) {
 
       fetchMilk();
     } catch (error: any) {
-      console.error(error);
-
-      if (error.response?.status === 401) {
-        toast.error("Unauthorized! Please login again");
-      } else {
-        toast.error(error.response?.data?.message || "Failed to add milk");
-      }
+      toast.error(error.response?.data?.message || "Failed to add milk");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-lg p-6 rounded-xl flex flex-col sm:flex-row gap-3 items-center justify-center max-w-4xl mx-auto mb-6"
-    >
-      <select
-        value={cow}
-        onChange={(e) => setCow(e.target.value)}
-        className="border p-2 rounded w-full sm:w-1/4"
-      >
-        <option value="">Select Cow</option>
-        {cows.map((c) => (
-          <option key={c._id} value={c._id}>
-            {c.name}
-          </option>
-        ))}
-      </select>
+    <div className="bg-white shadow-xl rounded-2xl p-6 mb-6 max-w-5xl mx-auto">
+      <h2 className="text-xl font-semibold mb-4 text-gray-700 text-center">
+        🥛 Add Milk Record
+      </h2>
 
-      <input
-        type="number"
-        placeholder="Milk (liters)"
-        value={quantity}
-        onChange={(e) => setQuantity(e.target.value)}
-        className="border p-2 rounded w-full sm:w-1/4"
-      />
+      <form className="grid grid-cols-1 md:grid-cols-4 gap-4" onSubmit={handleSubmit}>
+        
+        <select
+          value={cow}
+          onChange={(e) => setCow(e.target.value)}
+          className="border p-2 rounded focus:ring-2 focus:ring-blue-400"
+        >
+          <option value="">Select Cow</option>
+          {cows.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
 
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="border p-2 rounded w-full sm:w-1/4"
-      />
+        <input
+          type="number"
+          placeholder="Milk (liters)"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+          className="border p-2 rounded focus:ring-2 focus:ring-blue-400"
+        />
 
-      <button
-        type="submit"
-        disabled={loading}
-        className={`bg-blue-500 text-white px-4 py-2 rounded transition ${
-          loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
-        }`}
-      >
-        {loading ? "Saving..." : "Add Milk"}
-      </button>
-    </form>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="border p-2 rounded focus:ring-2 focus:ring-blue-400"
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-linear-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-medium hover:scale-105 transition"
+        >
+          {loading ? "Saving..." : "Add Milk"}
+        </button>
+      </form>
+    </div>
   );
 }
