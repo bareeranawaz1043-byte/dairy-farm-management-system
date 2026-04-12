@@ -14,13 +14,19 @@ export const protect = async (
   next: NextFunction
 ) => {
   let token;
+
   try {
+    console.log("👉 AUTH HEADER:", req.headers.authorization); // DEBUG
+
     if (req.headers.authorization?.startsWith("Bearer")) {
       token = req.headers.authorization.split(" ")[1];
 
+      console.log("👉 TOKEN RECEIVED:", token); // DEBUG
+
       const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
 
-      // Fetch full user from DB excluding password
+      console.log("👉 DECODED:", decoded); // DEBUG
+
       const user = await User.findById(decoded.id).select("-password");
 
       if (!user) {
@@ -33,7 +39,7 @@ export const protect = async (
       return res.status(401).json({ message: "Not authorized, token missing" });
     }
   } catch (error) {
-    console.error(error);
+    console.error("❌ TOKEN ERROR:", error);
     return res.status(401).json({ message: "Invalid token" });
   }
 };
