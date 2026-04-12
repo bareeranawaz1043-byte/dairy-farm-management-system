@@ -89,13 +89,23 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
         ))}
       </select>
 
-      <input
-        type="text"
-        placeholder="Feed Type (e.g. Grass, Grain)"
-        value={feedType}
-        onChange={(e) => setFeedType(e.target.value)}
-        className="border p-2 rounded w-full sm:w-1/4"
-      />
+      <select
+  value={feedType}
+  onChange={(e) => setFeedType(e.target.value)}
+  className="border p-2 rounded w-full sm:w-1/4"
+>
+  <option value="">Select Feeding Type</option>
+  <option value="Grass">Grass</option>
+  <option value="Dry Fodder">Dry Fodder</option>
+  <option value="Green Fodder">Green Fodder</option>
+  <option value="Silage">Silage</option>
+  <option value="Hay">Hay</option>
+  <option value="Corn">Corn</option>
+  <option value="Wheat Bran">Wheat Bran</option>
+  <option value="Oil Cake">Oil Cake</option>
+  <option value="Mineral Mix">Mineral Mix</option>
+  <option value="Concentrate Feed">Concentrate Feed</option>
+</select>
 
       <input
         type="number"
