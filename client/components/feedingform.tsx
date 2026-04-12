@@ -113,14 +113,20 @@ export default function FeedingForm({ cows, fetchFeeding }: Props) {
       />
 
       <button
-        type="submit"
-        disabled={loading}
-        className={`bg-green-500 text-white px-4 py-2 rounded ${
-          loading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
-        }`}
-      >
-        {loading ? "Saving..." : "Add Feeding"}
-      </button>
+  type="submit"
+  disabled={loading}
+  className={`
+    w-full py-3 rounded-xl text-white font-semibold text-lg
+    transition-all duration-300
+    bg-linear-to-r from-blue-500 to-indigo-600
+    hover:from-blue-600 hover:to-indigo-700
+    active:scale-95
+    shadow-md hover:shadow-lg
+    ${loading ? "opacity-50 cursor-not-allowed" : ""}
+  `}
+>
+  {loading ? "Processing..." : "Add Feeding"}
+</button>
     </form>
   );
 }
