@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { FaCrow, FaMoneyBill, FaExclamationTriangle } from "react-icons/fa";
+import { FaMoneyBill, FaExclamationTriangle } from "react-icons/fa";
 import { GiMilkCarton } from "react-icons/gi";
+import { FaCow } from "react-icons/fa6";
 import DashboardFilters from "./dashboardfilters";
 import API from "../utils/api";
 
@@ -114,7 +115,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <Card title="Total Cows" value={data.cows} icon={<FaCrow />} color="bg-blue-500" />
+        <Card title="Total Cows" value={data.cows} icon={<FaCow />} color="bg-blue-500" />
         <Card title="Total Milk" value={`${data.milk} L`} icon={<GiMilkCarton />} color="bg-green-500" />
         <Card title="Total Sales" value={`Rs ${data.sales}`} icon={<FaMoneyBill />} color="bg-purple-500" />
         <Card title="Alerts" value={data.alerts} icon={<FaExclamationTriangle />} color="bg-red-500" />
